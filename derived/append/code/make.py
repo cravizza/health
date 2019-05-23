@@ -5,6 +5,7 @@ def main():
 	os.system('python beneficiaries.py')
 	os.system('python dictionaries.py')
 	os.system('python pbonificadas.py')
+	os.system('python solicitudges.py')
 
 	# Logging
 	filenames = [os.path.join(path, f) for path, sd, files in os.walk('../output') for f in files if 'log_' in f]

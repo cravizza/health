@@ -11,14 +11,16 @@ import sys
 
 # Define globals
 pDerived = 'D:/Personal Directory/Catalina/Derived/'
-col_dtypes = { 0:'Int32'   , 1:'Int8'    , 2:'Int32', 3:'Int32', 4:'Int32'   , 5:'Int32'   , 8:'category'
-              ,9:'category',10:'category',11:'Int32',12:'Int8' ,13:'category',14:'category',15:'category'}
-col_names = { 0:'month' ,1:'isapre', 2:'id_m',   3:'id_m_alt', 4:'id_b'  , 5:'id_b_alt', 6:'dob'   , 7:'dod_m' 
-             ,8:'gender',9:'civs_m',10:'pais_m',11:'munici'  ,12:'region',13:'codrel'  ,14:'typben',15:'valid'}
+col_dtypes = { 0:'Int32'   , 1:'Int8'    , 2:'Int32'   , 3:'Int32'   , 4:'Int32' , 5:'Int32'   , 6:'string'
+             , 7:'string'  , 8:'category', 9:'category',10:'category',11:'Int32' ,12:'Int8'    ,13:'category'
+             ,14:'category',15:'category'}
+col_names =  { 0:'month'   , 1:'isapre'  , 2:'id_m'    , 3:'id_m_alt', 4:'id_b'  , 5:'id_b_alt', 6:'dob'     
+             , 7:'dod_m'   , 8:'gender'  , 9:'civs_m'  ,10:'pais_m'  ,11:'munici',12:'region'  ,13:'codrel'
+             ,14:'typben'  ,15:'valid'}
 col_dat = ['dob','dod_m']
 col_int = ['month','isapre','id_m','id_m_alt','id_b','id_b_alt','munici','region']
 col_str = ['gender','civs_m','pais_m','codrel','typben','valid']
-col_cat = ['month','isapre','munici','region']
+col_cat = ['munici','region']
 
 def readcsv(a):
     df = pd.read_csv(a, sep='|', header=None, dtype=col_dtypes)
@@ -51,7 +53,7 @@ def clean_single_df(df):
         df[c] = df[c].astype('category')
     
     # Create dictionary
-    df['valid']  = df['valid'].cat.set_categories(['s','n'])
+    df['valid']  =  df['valid'].cat.set_categories(['s','n'])
     df['civs_m'] = df['civs_m'].cat.set_categories(['no info','soltera','casada','divorciada','viuda'])
     df['typben'] = df['typben'].cat.set_categories(['no info','cotizante','carga','beneficiario'])
     df['codrel'] = df['codrel'].cat.set_categories(['no info','cotizante','conyuge','hijo','parent'])
@@ -95,6 +97,12 @@ def clean_df_concat(df):
 
     assert df2.duplicated(['month','isapre','id_m','id_b'],keep=False).values.sum() == 0
     assert len(df2.columns) == 13
+    
+    df2['isapre'] = df2['isapre'].astype('int8')
+    df2['month']  =  df2['month'].astype('int32')
+    df2['id_m']   =   df2['id_m'].astype('int32')
+    df2['id_b']   =   df2['id_b'].astype('int32')
+
     print('-- Total rows dropped : ' + str(l0-len(df2)) + ' rows dropped (' + str(int((l0-len(df2))/l0*10000)/100) + '%)')
     return df2
 
@@ -128,6 +136,14 @@ def main():
     
     print('\n-- Final dataframe dtypes')  
     final_df.info(memory_usage='deep')
+
+    print('\n-- Descriptive statistics for tex file')
+    print('\item Observations: ' + str(len(final_df)))
+    print('\item Families: ' + str(final_df['id_m'].nunique()))
+    print('\item Individuals: ' + str(final_df['id_b'].nunique()))
+    print('\item Men: ' + str(int(final_df['gender'].value_counts(normalize=True)['masculino']*10000)/100) + '\%')
+    print('\item Main insured: ' + str(int(final_df['typben'].value_counts(normalize=True)['cotizante']*10000)/100) + '\%')
+    print('\item Median number of months by family: ' + str(final_df.groupby('id_m')['month'].nunique().median()))
 
     print('\n-- Create dictionary of families')
     df_families = final_df[['isapre','id_m','id_b']].drop_duplicates().copy()

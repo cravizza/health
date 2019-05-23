@@ -24,7 +24,7 @@ col_names = { 0:'isapre'  , 1:'month'   , 2:'typreg'  , 3:'id_b'    , 4:'gender'
 col_dat = ['date']
 col_int = ['month','isapre','id_m','id_b','copay','age','proid'] 
 col_str = ['typreg','gender','typben','code','codeid','planty']
-col_cat = ['month','isapre','proreg','promun','date','code'] 
+col_cat = ['proreg','promun'] 
 use_cols = [0,1,2,3,4,5,6,7,11,12,14,21,23,29,30,31]
 dic_date  = [x.strftime('%Y-%m-%d') for x in pd.date_range('2012-01-01', '2017-12-31').tolist()]
 dic_month = pd.read_csv(pDerived + 'dic_month.csv',header=None,dtype={0:'category'})[0].tolist()
@@ -85,6 +85,19 @@ def clean_df_concat(df):
     print('-- Drop if not in beneficiaries:  ' + str(l0-l1) + ' rows dropped (' + str(int((l0-l1)/l0*10000)/100) + '%)')
     del df_families
     
+    final_df = final_df.loc[final_df['date'].notnull()] 
+    final_df = final_df.loc[final_df['code'].notnull()]
+    final_df['code2'] = final_df.code.str.zfill(7).str[0:2]  # var of first two digits of codes
+    final_df['code7'] = final_df.code.str.zfill(7)
+
+    final_df['isapre'] = final_df['isapre'].astype('int8')
+    final_df['month']  =  final_df['month'].astype('int32')
+    final_df['id_m']   =   final_df['id_m'].astype('int32')
+    final_df['id_b']   =   final_df['id_b'].astype('int32')
+    final_df['date']   =   final_df['date'].astype('category')
+    final_df['code2']  =  final_df['code2'].astype('category')
+    final_df['code7']  =  final_df['code7'].astype('category')
+    
     final_df.reset_index(drop=True, inplace=True)
     return final_df
 
@@ -121,6 +134,13 @@ def main():
 
     print('\n-- Final dataframe dtypes')
     final_df.info(memory_usage='deep')
+
+    print('\n-- Descriptive statistics for tex file')
+    print('\item Observations: ' + str(len(final_df)))
+    print('\item Families: '    + str(final_df['id_m'].nunique()))
+    print('\item Individuals: ' + str(final_df['id_b'].nunique()))
+    print('\item Men: ' + str(int(final_df['gender'].value_counts(normalize=True)['masculino']*10000)/100) + '\%')
+    print('\item Main insured: ' + str(int(final_df['typben'].value_counts(normalize=True)['cotizante']*10000)/100) + '\%')
 
     print('\n-- Split final dataframe ') 
     df1 = final_df[0:110000000]
