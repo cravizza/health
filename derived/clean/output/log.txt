@@ -3,11 +3,11 @@ Logging: health\derived\clean\code
 
 
 -- Executing: health\derived\clean\code/hiv.py
--- Timestamp: 2019-06-03 16:12:52
+-- Timestamp: 2019-06-03 16:56:14
 
--- Time elapsed load and concat: 55 sec.
+-- Time elapsed load and concat: 57 sec.
 
--- Time elapsed load and concat: 221 sec.
+-- Time elapsed load and concat: 240 sec.
 
 -- Time elapsed load: 0 sec.
 <class 'pandas.core.frame.DataFrame'>
@@ -90,24 +90,24 @@ pregnant    56568 non-null int8
 dtypes: category(8), float64(1), int32(3), int8(3), object(3)
 memory usage: 9.5 MB
 
--- Timestamp: 2019-06-03 16:31:28
+-- Timestamp: 2019-06-03 17:13:47
 
 
 
 
 -- Executing: health\derived\clean\code/seasonality.py
--- Timestamp: 2019-06-03 16:09:41
+-- Timestamp: 2019-06-03 16:51:44
 
--- Time elapsed load and concat: 36 sec.
+-- Time elapsed load and concat: 98 sec.
 
 
--- Timestamp: 2019-06-03 16:12:44
+-- Timestamp: 2019-06-03 16:56:05
 
 
 
 
 -- Executing: health\derived\clean\code/solicitudges.py
--- Timestamp: 2019-06-03 16:12:46
+-- Timestamp: 2019-06-03 16:56:07
 
 -- Dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -143,4 +143,4 @@ memory usage: 2.7 MB
 
 -- Dataframe size
 
--- Timestamp: 2019-06-03 16:12:51
+-- Timestamp: 2019-06-03 16:56:14

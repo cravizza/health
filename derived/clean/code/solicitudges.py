@@ -23,6 +23,7 @@ def main():
     dfg_hiv['icd10hiv'] = dfg_hiv['icd10'].str.contains(icd10_hiv, regex=True)
     dfg_hiv.drop(columns=['pronam'], inplace=True)
     dfg_hiv.to_pickle(pDerived + 'hiv_ges')
+    dfg_hiv.to_stata('../output/hiv_ges.dta')
     
     print('\n-- Dataframe dtypes')
     dfg_hiv.info(memory_usage='deep')
