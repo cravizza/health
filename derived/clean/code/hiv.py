@@ -26,7 +26,7 @@ def main():
     del df1
     del df2
     print('\n-- Time elapsed load and concat: ' + str(int(time.time() - start0)) + ' sec.')
-    
+
     # Load pbon
     start1 = time.time()
     df1 = pd.read_pickle(pDerived + 'pboni1')
@@ -47,64 +47,88 @@ def main():
     dfg = dfg.loc[(dfg['month']>=201201)]
     print('\n-- Time elapsed load: ' + str(int(time.time() - start2)) + ' sec.')
     
-    # Create HIV sample
+    print('\n-- Create sample of 2017 beneficiaries')
+    ben_2017_pre = dfb.loc[(dfb['gender']=='masculino')&(dfb['month'].between(201701, 201712)),['id_m','id_b','munici']].drop_duplicates()
+    ben_2017_pre.drop(columns=['id_m'], inplace=True)
+    ben_2017 = ben_2017_pre.groupby(['munici']).count()
+    ben_2017.to_stata('../output/ben_2017.dta')
+    del ben_2017_pre
+    del ben_2017
+    
+    print('\n-- Create HIV sample')
     # Find people that voluntarily take HIV test: pregnant women always take it
     # Identify pregnant women with code 0404002 = obstetric ultrasound
     dfp['temp'] = dfp['code7'].isin(['0404002'])
     dfp['pregnant'] = dfp.groupby(by=['id_m','id_b'])['temp'].transform('max')
     dfp.drop(columns=['temp'], inplace=True)
-    df_hiv = dfp.loc[dfp['code7'] == '0306169'].copy()
-    df_hiv.reset_index(drop=True,inplace=True)
-    df_hiv['date'] = df_hiv['date'].astype('str')
-    df_hiv.drop(columns=['code2','code7','code','codeid','typreg'], inplace=True)
-    df_hiv.to_stata('../output/hiv_tests.dta')
+    hiv_tests = dfp.loc[dfp['code7'] == '0306169'].copy()
+    hiv_tests.reset_index(drop=True,inplace=True)
+    hiv_tests['date'] = hiv_tests['date'].astype('str')
+    hiv_tests.drop(columns=['code2','code7','code','codeid','typreg'], inplace=True)
+    hiv_tests.to_stata('../output/hiv_tests.dta')
     
     # Subsets
-    df_hiv['hiv'] = 1
-    df_mm   =              df_hiv[['id_m','month']].drop_duplicates()
-    df_mmb  =       df_hiv[['id_b','id_m','month']].drop_duplicates()
-    df_hiv2 = df_hiv[['hiv','id_b','id_m','month']].drop_duplicates()
-    dfg_mmb =          dfg[['id_b','id_m','month']].drop_duplicates()
-    df_hiv[['id_m','id_b','month']].info()
+    hiv_tests['hiv'] = 1
+    hiv_fam0 = hiv_tests[['month','id_m']].drop_duplicates()
+    hiv_ids  = hiv_tests[['month','id_m','id_b']].drop_duplicates()
+    hiv_ids2 = hiv_tests[['month','id_m','id_b','hiv']].drop_duplicates()
+    ges_ids  =       dfg[['month','id_m','id_b']].drop_duplicates()
+    hiv_tests[['id_m','id_b','month']].info()
     
     print('\n-- Families of hiv testers')
-    interm      = pd.merge(df_mm ,dfb    ,how='left',on=['month','id_m'])
-    interm      = interm.loc[interm['isapre'].notnull()] 
-    df_hiv_fam  = pd.merge(interm,df_hiv2,how='left',on=['month','id_m','id_b'])
-    df_hiv_fam['hiv'].fillna(0, inplace=True)
+    interm  = pd.merge(hiv_fam0, dfb, how='left', on=['month','id_m'])
+    interm  = interm.loc[interm['isapre'].notnull()] 
+    hiv_fam = pd.merge(interm, hiv_ids2, how='left', on=['month','id_m','id_b'])
+    hiv_fam['hiv'].fillna(0, inplace=True)
     for c in ['hiv','isapre']:
-        df_hiv_fam[c] = df_hiv_fam[c].astype('int8')
+        hiv_fam[c] = hiv_fam[c].astype('int8')
     for c in ['id_b','dob','dod_m']:
-        df_hiv_fam[c] = df_hiv_fam[c].astype('int32')
+        hiv_fam[c] = hiv_fam[c].astype('int32')
     for c in ['region','munici']:
-        df_hiv_fam[c] = df_hiv_fam[c].astype('string')
-    df_hiv_fam.reset_index(drop=True,inplace=True)
-    df_hiv_fam.info(memory_usage='deep')
-    df_hiv_fam.to_stata('../output/hiv_fam.dta')
-    del df_hiv_fam
+        hiv_fam[c] = hiv_fam[c].astype('string')
+    hiv_fam.reset_index(drop=True,inplace=True)
+    hiv_fam.info(memory_usage='deep')
+    hiv_fam.to_stata('../output/hiv_fam.dta')
+    del hiv_fam
     del interm
-    del df_mm
-    del df_hiv2    
+    del hiv_fam0
+    del hiv_ids2
     
     print('\n-- Pbon of hiv testers')
-    df_hiv_pbon = pd.merge(df_mmb, dfp, how='left', on=['id_m','id_b','month'])
+    hiv_pbon = pd.merge(hiv_ids, dfp, how='left', on=['id_m','id_b','month'])
     for c in ['code','code2','code7']:
-        df_hiv_pbon[c] = df_hiv_pbon[c].astype('string')
-    df_hiv_pbon.reset_index(drop=True,inplace=True)
-    df_hiv_pbon.info(memory_usage='deep')
-    df_hiv_pbon.to_stata('../output/hiv_pbon.dta')
-    del df_hiv_pbon
+        hiv_pbon[c] = hiv_pbon[c].astype('string')
+    hiv_pbon.reset_index(drop=True,inplace=True)
+    hiv_pbon.info(memory_usage='deep')
+    hiv_pbon.to_stata('../output/hiv_pbon.dta')
+    del hiv_pbon
     
     print('\n-- Pbon of hiv confirmed')
-    df_hiv_conf = pd.merge(dfg_mmb, dfp, how='left', on=['id_m','id_b','month'])
-    df_hiv_conf = df_hiv_conf.loc[df_hiv_conf['isapre'].notnull()] 
+    hiv_conf = pd.merge(ges_ids, dfp, how='left', on=['id_m','id_b','month'])
+    hiv_conf = hiv_conf.loc[hiv_conf['isapre'].notnull()] 
     for c in ['code','code2','code7']:
-        df_hiv_conf[c] = df_hiv_conf[c].astype('string')
+        hiv_conf[c] = hiv_conf[c].astype('string')
     for c in ['age','isapre','pregnant']:
-        df_hiv_conf[c] = df_hiv_conf[c].astype('int8')
-    df_hiv_conf.reset_index(drop=True,inplace=True)
-    df_hiv_conf.info(memory_usage='deep')
-    df_hiv_conf.to_stata('../output/hiv_conf.dta')
+        hiv_conf[c] = hiv_conf[c].astype('int8')
+    hiv_conf.reset_index(drop=True,inplace=True)
+    hiv_conf.info(memory_usage='deep')
+    hiv_conf.to_stata('../output/hiv_conf.dta')
+    
+    print('\n-- Difference-in-differences')
+    hiv_ids_t = hiv_ids.loc[hiv_ids['month'].between(201212,201301),['id_m','id_b']]
+    hiv_ids_t['control'] = 0
+    hiv_ids_c = hiv_ids.loc[hiv_ids['month'].between(201708,201709),['id_m','id_b']]
+    hiv_ids_t['control'] = 1
+    hiv_ids_tc = pd.concat([hiv_ids_t,hiv_ids_c], axis=0, ignore_index=True)
+    hiv_did = pd.merge(hiv_ids_tc, dfp.loc[dfp['month'].between(201201,201401)], how='left', on=['id_m','id_b'])
+    hiv_did = hiv_did.loc[hiv_did['isapre'].notnull()] 
+    for c in ['code','code2','code7']:
+        hiv_did[c] = hiv_did[c].astype('string')
+    for c in ['age','isapre','pregnant']:
+        hiv_did[c] = hiv_did[c].astype('int8')
+    hiv_did.reset_index(drop=True,inplace=True)
+    hiv_did.info(memory_usage='deep')
+    hiv_did.to_stata('../output/hiv_did.dta')
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
