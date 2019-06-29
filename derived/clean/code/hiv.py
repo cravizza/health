@@ -115,12 +115,21 @@ def main():
     hiv_conf.to_stata('../output/hiv_conf.dta')
     
     print('\n-- Difference-in-differences')
-    hiv_ids_t = hiv_ids.loc[hiv_ids['month'].between(201212,201301),['id_m','id_b']]
-    hiv_ids_t['control'] = 0
-    hiv_ids_c = hiv_ids.loc[hiv_ids['month'].between(201708,201709),['id_m','id_b']]
-    hiv_ids_t['control'] = 1
-    hiv_ids_tc = pd.concat([hiv_ids_t,hiv_ids_c], axis=0, ignore_index=True)
-    hiv_did = pd.merge(hiv_ids_tc, dfp.loc[dfp['month'].between(201201,201401)], how='left', on=['id_m','id_b'])
+    hiv_ids['N'] = hiv_ids.groupby(['id_m','id_b'])['month'].transform('count')
+    df = hiv_ids.loc[hiv_ids['N']<10].copy()
+    df['m'] = df.groupby(['id_m','id_b'])['month'].transform('min')
+    df['m2'] = df.loc[df['month']!=df['m']].groupby(['id_m','id_b'])['month'].transform('min')
+    df['mm'] = df.groupby(['id_m','id_b'])['m2'].transform('max')
+    hiv_t = df.loc[(df['month'].between(201212,201301))&((df['mm']>201500)|(df['N']==1)),['id_m','id_b']]
+    hiv_t['control'] = 0
+    hiv_c = df.loc[(df['month'].between(201708,201709))&(df['m']>201500),['id_m','id_b']]
+    hiv_c['control'] = 1
+    del df
+    hiv_tc = pd.concat([hiv_t,hiv_c], ignore_index=True, sort='True')
+    del hiv_t
+    del hiv_c
+    hiv_did = pd.merge(hiv_tc, dfp.loc[dfp['month'].between(201201,201401)], how='left', on=['id_m','id_b'])
+    del hiv_tc
     hiv_did = hiv_did.loc[hiv_did['isapre'].notnull()] 
     for c in ['code','code2','code7']:
         hiv_did[c] = hiv_did[c].astype('string')
@@ -129,6 +138,7 @@ def main():
     hiv_did.reset_index(drop=True,inplace=True)
     hiv_did.info(memory_usage='deep')
     hiv_did.to_stata('../output/hiv_did.dta')
+    del hiv_did
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 

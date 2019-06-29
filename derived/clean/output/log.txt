@@ -3,11 +3,11 @@ Logging: health\derived\clean\code
 
 
 -- Executing: health\derived\clean\code/hiv.py
--- Timestamp: 2019-06-27 17:02:46
+-- Timestamp: 2019-06-29 17:20:18
 
--- Time elapsed load and concat: 54 sec.
+-- Time elapsed load and concat: 39 sec.
 
--- Time elapsed load and concat: 235 sec.
+-- Time elapsed load and concat: 192 sec.
 
 -- Time elapsed load: 0 sec.
 
@@ -96,48 +96,48 @@ memory usage: 9.5 MB
 
 -- Difference-in-differences
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 1917731 entries, 0 to 1917730
+RangeIndex: 1183720 entries, 0 to 1183719
 Data columns (total 19 columns):
-control     float64
-id_b        int32
-id_m        int32
-isapre      int8
-month       float64
-typreg      category
-gender      category
-age         int8
-typben      category
-code        object
-codeid      category
-date        category
-copay       float64
-planty      category
-proreg      category
-promun      category
-code2       object
-code7       object
-pregnant    int8
-dtypes: category(8), float64(3), int32(2), int8(3), object(3)
-memory usage: 336.7 MB
+control     1183720 non-null int64
+id_b        1183720 non-null int32
+id_m        1183720 non-null int32
+isapre      1183720 non-null int8
+month       1183720 non-null float64
+typreg      1183720 non-null category
+gender      1183720 non-null category
+age         1183720 non-null int8
+typben      1183720 non-null category
+code        1183720 non-null object
+codeid      1183720 non-null category
+date        1183720 non-null category
+copay       1183720 non-null float64
+planty      1183720 non-null category
+proreg      1183720 non-null category
+promun      1183720 non-null category
+code2       1183720 non-null object
+code7       1183720 non-null object
+pregnant    1183720 non-null int8
+dtypes: category(8), float64(2), int32(2), int64(1), int8(3), object(3)
+memory usage: 207.9 MB
 
--- Timestamp: 2019-06-27 17:20:28
+-- Timestamp: 2019-06-29 17:36:55
 
 
 
 
 -- Executing: health\derived\clean\code/seasonality.py
--- Timestamp: 2019-06-27 16:59:35
+-- Timestamp: 2019-06-29 17:17:29
 
--- Time elapsed load and concat: 35 sec.
+-- Time elapsed load and concat: 33 sec.
 
 
--- Timestamp: 2019-06-27 17:02:25
+-- Timestamp: 2019-06-29 17:20:10
 
 
 
 
 -- Executing: health\derived\clean\code/solicitudges.py
--- Timestamp: 2019-06-27 17:02:39
+-- Timestamp: 2019-06-29 17:20:12
 
 -- Dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -170,7 +170,35 @@ month       8876 non-null int32
 icd10hiv    8876 non-null bool
 dtypes: bool(1), category(11), int32(5), int64(2), int8(1), object(5)
 memory usage: 2.7 MB
+None
 
 -- Dataframe size
+Index        71008
+isapre        8876
+gessol       71008
+date        452676
+id_m         35504
+id_b         35504
+gender        9069
+dob         452676
+gescod       15086
+event         9077
+evdate      452676
+re_isa        9122
+re_idat     452676
+re_irej       9170
+re_inot       9061
+re_ibdat    452676
+proid        35504
+re_ben        9124
+re_brej       9186
+gesid        71008
+id_reg       35504
+icd10        93722
+gessta        9070
+gesclo        9585
+month        35504
+icd10hiv      8876
+dtype: int64
 
--- Timestamp: 2019-06-27 17:02:45
+-- Timestamp: 2019-06-29 17:20:17
