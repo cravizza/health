@@ -4,7 +4,6 @@ Create cleaned datasets of ges
 from __future__ import division # to use division (instead of integer division) in python 2
 import os
 import pandas as pd 
-import time
 import datetime
 import sys
 
@@ -26,9 +25,9 @@ def main():
     dfg_hiv.to_stata('../output/hiv_ges.dta')
     
     print('\n-- Dataframe dtypes')
-    dfg_hiv.info(memory_usage='deep')
+    print(dfg_hiv.info(memory_usage='deep'))
     print('\n-- Dataframe size')
-    dfg_hiv.memory_usage(deep=True)
+    print(dfg_hiv.memory_usage(deep=True))
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     sys.stdout.close()
