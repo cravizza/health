@@ -5,7 +5,9 @@ clear all
 set more off
 
 program main
-	clean_families
+	foreach filename in  "hiv_fam" "hiv_did_fam" {
+		clean_families, filename(`filename')
+	}
 	clean_confirmations	
 	
 	use "..\..\..\derived\clean\output\hiv_conf.dta", clear
@@ -23,7 +25,7 @@ program main
 	keep if i_hiv==1
 	drop i_hiv code*
 	create_hiv_vars
-	merge m:1 id_m id_b month isapre using ..\temp\hiv_fam_info.dta , keep(1 3) nogen
+	merge m:1 id_m id_b month isapre using ..\temp\hiv_fam.dta      , keep(1 3) nogen
 	merge m:1 id_m id_b              using ..\temp\hiv_conf_date.dta, keep(1 3) nogen
 	gen married = (partner==1) if child!=1 & inlist(civs,1,2)
 	label define married 0 "Single" 1 "Married"
@@ -33,6 +35,18 @@ program main
 	label define child 0 "Main insured" 1 "Dependent"
 	label values child child
 	save ..\temp\hiv_tests.dta, replace
+	
+	enrolled
+	use "..\..\..\derived\clean\output\hiv_did.dta", clear
+	clean_pbon_time	
+	create_demo_vars
+	merge m:1 id_b id_m using ..\temp\enrolled.dta
+	bys id_m id_b: egen date_hivm = min(date_hiv)
+	format %td date_hivm
+	bys id_m id_b : egen n_hiv_tests = max(n_hiv_test)
+	assert (!mi(date_hivm) & control==0) | (mi(date_hivm) & control==1)
+	keep if gender==1 & pregnant==0 & enr==1
+	save ..\temp\hiv_did.dta, replace
 end
 
 capture program drop clean_pbon_time
@@ -87,7 +101,24 @@ program              create_demo_vars
 	capture label drop age_groups
 	label define age_groups `age_groups'
 	label values age_male    age_groups
-	label values age_female  age_groups
+	label values age_female  age_groups	
+	local start_list = "15 20 25 30 35 40 45 50"
+	local   end_list = "19 24 29 34 39 44 59 60"
+	gen age_a_male =.
+	gen age_a_female =.
+	local N = `: word count `start_list''
+	local age_groups = ""
+	forv x = 1(1)`N' {
+		local s1: word `x' of `start_list'
+		local e1: word `x' of   `end_list'
+		local age_groups = `"`age_groups'"' + `" `x' "`s1'_`e1'" "'
+		replace   age_a_male = `x' if gender==1 & inrange(age,`s1',`e1')
+		replace age_a_female = `x' if gender==0 & inrange(age,`s1',`e1')
+	}
+	capture label drop age_groups
+	label define age_groups `age_groups'
+	label values age_a_male    age_groups
+	label values age_a_female  age_groups
 	* Regions
 	gen     proreg_13 = 13 if proreg==13
 	replace proreg_13 = 1  if proreg!=13
@@ -143,7 +174,8 @@ end
 
 capture program drop clean_families
 program              clean_families
-	use "..\..\..\derived\clean\output\hiv_fam.dta", clear
+syntax, filename(string)
+	use "..\..\..\derived\clean\output\\`filename'.dta", clear
 	drop index
 	* Fix main insured
 	replace codrel = 1 if id_m==id_b & codrel!=1
@@ -186,9 +218,9 @@ program              clean_families
 	gen child = 1 if codrel==3
 	gen partner = 1 if civs==2
 	* Prepare to merge
-	keep if hiv==1
+	capture keep if hiv==1
 	keep id_m id_b month isapre partner_fem partner child civs typben codrel region munici dod_m pais_m	
-	save ..\temp\hiv_fam_info.dta, replace
+	save "..\temp\\`filename'.dta", replace
 end
 
 capture program drop clean_confirmations
@@ -208,6 +240,34 @@ program              clean_confirmations
 	rename date conf_date
 	keep id_m id_b conf_date
 	save ..\temp\hiv_conf_date.dta, replace
+end
+
+capture program drop enrolled
+program              enrolled
+	use "..\..\..\derived\clean\output\hiv_did_enr.dta", clear
+	drop index
+	duplicates drop
+	bys id_m id_b: egen n_m = count(month)
+	drop if n_m<21
+	/* * Consecutive months
+	egen id = group(id_m id_b)
+	gen Month = mofd(date(string(month),"YM"))
+	format %tm Month
+	drop month
+	xtset id Month
+	tsfill, full
+	sort id Month
+	bys id (Month) n_m: gen ni = _n
+	gen _seq = .
+	replace _seq = cond((n_m==. & L.n_m!=.)|(L.n_m==. & n_m!=.), 1, L._seq + 1)
+	replace _seq = ni if mi(_seq)
+	by id (Month): gen long _spell = cond(_seq, sum(_seq == 1), 0)
+	by id: egen _Mspell = max(_spell)
+	drop if _Mspell>2 */
+	keep id_m id_b 
+	duplicates drop
+	gen enr = 1
+	save ..\temp\enrolled.dta, replace
 end
 
 main
