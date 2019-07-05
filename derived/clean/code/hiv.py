@@ -129,7 +129,7 @@ def main():
     del hiv_t
     del hiv_c
     hiv_did = pd.merge(hiv_tc, dfp.loc[dfp['month'].between(201201,201401)], how='left', on=['id_m','id_b'])
-    del hiv_tc
+#    del hiv_tc
     hiv_did = hiv_did.loc[hiv_did['isapre'].notnull()] 
     for c in ['code','code2','code7']:
         hiv_did[c] = hiv_did[c].astype('string')
@@ -138,6 +138,28 @@ def main():
     hiv_did.reset_index(drop=True,inplace=True)
     hiv_did.info(memory_usage='deep')
     hiv_did.to_stata('../output/hiv_did.dta')
+        
+    print('\n-- Families of did sample')
+    did_fam0 = hiv_did[['id_m']].drop_duplicates()
+    did_ids2 = hiv_did[['id_m','id_b','control']].drop_duplicates()
+    interm  = pd.merge(did_fam0, dfb.loc[dfb['month'].between(201201,201401)], how='left', on=['id_m'])
+    interm  = interm.loc[interm['isapre'].notnull()] 
+    did_fam = pd.merge(interm, did_ids2, how='left', on=['id_m','id_b'])
+    did_fam['control'].fillna(9, inplace=True)
+    for c in ['control','isapre']:
+        did_fam[c] = did_fam[c].astype('int8')
+    for c in ['id_b','dob','dod_m','month']:
+        did_fam[c] = did_fam[c].astype('int32')
+    for c in ['region','munici']:
+        did_fam[c] = did_fam[c].astype('string')
+    did_fam.reset_index(drop=True,inplace=True)
+    did_fam.info(memory_usage='deep')
+    did_fam.loc[did_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_did_enr.dta')
+    did_fam.loc[did_fam['month']==201212].to_stata('../output/hiv_did_fam.dta')
+    del did_fam
+    del interm
+    del did_fam0
+    del did_ids2
     del hiv_did
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
