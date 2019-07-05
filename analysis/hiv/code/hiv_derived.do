@@ -40,12 +40,12 @@ program main
 	use "..\..\..\derived\clean\output\hiv_did.dta", clear
 	clean_pbon_time	
 	create_demo_vars
-	merge m:1 id_b id_m using ..\temp\enrolled.dta
+	merge m:1 id_b id_m using ..\temp\enrolled.dta   , nogen keep(3)
+	merge m:1 id_b id_m using ..\temp\hiv_did_fam.dta, nogen keep(3)
 	bys id_m id_b: egen date_hivm = min(date_hiv)
 	format %td date_hivm
 	bys id_m id_b : egen n_hiv_tests = max(n_hiv_test)
 	assert (!mi(date_hivm) & control==0) | (mi(date_hivm) & control==1)
-	keep if gender==1 & pregnant==0 & enr==1
 	save ..\temp\hiv_did.dta, replace
 end
 
@@ -218,8 +218,51 @@ syntax, filename(string)
 	gen child = 1 if codrel==3
 	gen partner = 1 if civs==2
 	* Prepare to merge
-	capture keep if hiv==1
-	keep id_m id_b month isapre partner_fem partner child civs typben codrel region munici dod_m pais_m	
+	
+	if "`filename'" == "hiv_did_fam" {
+		keep if control!=9
+		preserve
+			keep id_m id_b isapre
+			duplicates drop
+			bys id_m id_b: egen ni_fam = count(isapre)
+			//rename isapre isapre_fam
+			tempfile isapre_fam
+			save `isapre_fam'
+		restore
+		preserve
+			use id_m id_b isapre using "..\..\..\derived\clean\output\hiv_did.dta", clear
+			duplicates drop
+			bys id_m id_b: egen ni_pb = count(isapre)
+			merge 1:1 id_m id_b isapre using `isapre_fam'
+			
+			bys id_m id_b: egen n_pb  = max(cond(ni_pb ,ni_pb,-99))
+			bys id_m id_b: egen n_fam = max(cond(ni_fam,ni_fam,-99))
+			forval x=1/3 {
+				bys id_m id_b: egen _m`x' = max(cond(_merge==`x',1,0))
+			}
+			gen _tag = (n_fam==2 & _m3 & _m2 & _merge!=3)
+			drop if _tag
+			gen     isapre_ok = isapre if n_fam==2 & n_pb==1
+			replace isapre_ok = 99 if n_f==2 & n_p>1
+			keep id_m id_b isapre_ok
+			duplicates drop
+			isid id_m id_b
+			tempfile isapre_pb
+			save `isapre_pb'
+		restore
+		
+		merge m:1 id_b id_m using `isapre_pb', keep(1 3) nogen
+		bys id_m id_b: egen n_i = count(isapre)
+		assert inlist(n_i,1,2)
+		keep if n_i==1 | (n_i==2 & isapre==isapre_ok & !mi(isapre_ok))
+		
+		isid id_m id_b		
+		keep id_m id_b control partner_fem partner child civs typben codrel region munici dod_m pais_m	
+	}
+	if "`filename'" == "hiv_did" {
+		keep if hiv==1
+		keep id_m id_b month isapre partner_fem partner child civs typben codrel region munici dod_m pais_m	
+	}
 	save "..\temp\\`filename'.dta", replace
 end
 
