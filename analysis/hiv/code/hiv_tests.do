@@ -60,7 +60,6 @@ syntax, time(varname) r_var(varname) window(int)
 		gen tests = _b[_cons] + resid		
 		lab var tests2 "Number of tests"
 		lab var tests "Number of tests (deseas.)"
-		
 		keep if Week>=tw(2015w1)
 		gen b = Week - tw(2015w1) 
 		local ic0 = word("${hiv_`time'}",-1)
@@ -138,11 +137,7 @@ syntax, r_var(varname) time(varname)
 	preserve
 		collapse (count) tests2=age if `r_var'==1, by(`time')
 		gen  `time'no = week(dofw(`time'))
-		qui reg tests2 i.`time'no
-		predict resid, residuals
-		gen tests = _b[_cons] + resid		
 		lab var tests2 "Number of tests"
-		lab var tests "Number of tests (deseas.)"
 		local tw_opts = `"${wb} ${hiv_`time'_tlinelab}"'
 		* Trends
 		tw line tests2 `time', lc(midgreen) `tw_opts'
@@ -165,13 +160,24 @@ syntax, r_var(varname) time(varname)
 			}
 		}
 		* Piecewise reg
-		eststo: reg tests a_* b_*, nocons // i.weekno, nocons
+		eststo: reg tests2 a_* b_*  i.`time'no, nocons
 		esttab using "../output/pw_hiv_`r_var'_`time'.tex", replace label nomti nonumbers ///
 			cells("b(fmt(%8.2f) label(Coef.)) se(fmt(%8.2f) label(Std. err.) par)") ///
 			starlevels( * 0.10 ** 0.05 *** 0.010) stardetach wide nogaps d(a_0 a_1 a_2 a_3) compress ///
 			stats(N, fmt(%9.0fc) l("Obs.")) nofloat // title(Estimated slopes\vspace{-1ex}) 
 		eststo clear 
-		predict tests_hat
+		predict tests_hat2
+		forval x=2/52 {
+			gen sum_`x' = _b[`x'.Weekno]
+		}
+		gen tests = .
+		gen tests_hat =  .
+		forval x=2/52 {
+			replace tests     = tests2      - sum_`x' if Weekno==`x'
+			replace tests_hat = tests_hat2  - sum_`x' if Weekno==`x'
+		}
+		lab var tests "Number of tests (deseas.)"
+		lab var tests_hat "Fitted values (deseas.)"
 		file open myfile using "../output/pw_test_hiv_`r_var'_`time'.txt", write replace
 		qui test a_4 == a_5
 		local a_eq:  di %9.4f r(p)
