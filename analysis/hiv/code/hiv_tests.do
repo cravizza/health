@@ -163,7 +163,7 @@ syntax, r_var(varname) time(varname)
 		eststo: reg tests2 a_* b_*  i.`time'no, nocons
 		esttab using "../output/pw_hiv_`r_var'_`time'.tex", replace label nomti nonumbers ///
 			cells("b(fmt(%8.2f) label(Coef.)) se(fmt(%8.2f) label(Std. err.) par)") ///
-			starlevels( * 0.10 ** 0.05 *** 0.010) stardetach wide nogaps d(a_0 a_1 a_2 a_3) compress ///
+			starlevels( * 0.10 ** 0.05 *** 0.010) stardetach wide nogaps d(a_0 a_1 a_2 a_3 *.`time'no) compress ///
 			stats(N, fmt(%9.0fc) l("Obs.")) nofloat // title(Estimated slopes\vspace{-1ex}) 
 		eststo clear 
 		predict tests_hat2
