@@ -118,18 +118,10 @@ def main():
     hiv_ids['N'] = hiv_ids.groupby(['id_m','id_b'])['month'].transform('count')
     df = hiv_ids.loc[hiv_ids['N']<10].copy()
     df['m'] = df.groupby(['id_m','id_b'])['month'].transform('min')
-    df['m2'] = df.loc[df['month']!=df['m']].groupby(['id_m','id_b'])['month'].transform('min')
-    df['mm'] = df.groupby(['id_m','id_b'])['m2'].transform('max')
-    hiv_t = df.loc[(df['month'].between(201212,201301))&((df['mm']>201500)|(df['N']==1)),['id_m','id_b']]
+    hiv_t = df.loc[df['month'].between(201708,201709),['id_m','id_b','N','m']]
     hiv_t['control'] = 0
-    hiv_c = df.loc[(df['month'].between(201708,201709))&(df['m']>201500),['id_m','id_b']]
-    hiv_c['control'] = 1
-    del df
-    hiv_tc = pd.concat([hiv_t,hiv_c], ignore_index=True, sort='True')
+    hiv_did = pd.merge(hiv_t, dfp.loc[dfp['month'].between(201601,201712)], how='left', on=['id_m','id_b'])
     del hiv_t
-    del hiv_c
-    hiv_did = pd.merge(hiv_tc, dfp.loc[dfp['month'].between(201201,201401)], how='left', on=['id_m','id_b'])
-#    del hiv_tc
     hiv_did = hiv_did.loc[hiv_did['isapre'].notnull()] 
     for c in ['code','code2','code7']:
         hiv_did[c] = hiv_did[c].astype('string')
@@ -142,7 +134,7 @@ def main():
     print('\n-- Families of did sample')
     did_fam0 = hiv_did[['id_m']].drop_duplicates()
     did_ids2 = hiv_did[['id_m','id_b','control']].drop_duplicates()
-    interm  = pd.merge(did_fam0, dfb.loc[dfb['month'].between(201201,201401)], how='left', on=['id_m'])
+    interm  = pd.merge(did_fam0, dfb.loc[dfb['month'].between(201601,201712)], how='left', on=['id_m'])
     interm  = interm.loc[interm['isapre'].notnull()] 
     did_fam = pd.merge(interm, did_ids2, how='left', on=['id_m','id_b'])
     did_fam['control'].fillna(9, inplace=True)
@@ -155,7 +147,7 @@ def main():
     did_fam.reset_index(drop=True,inplace=True)
     did_fam.info(memory_usage='deep')
     did_fam.loc[did_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_did_enr.dta')
-    did_fam.loc[did_fam['month']==201212].to_stata('../output/hiv_did_fam.dta')
+    did_fam.loc[did_fam['month']==201708].to_stata('../output/hiv_did_fam.dta')
     del did_fam
     del interm
     del did_fam0
