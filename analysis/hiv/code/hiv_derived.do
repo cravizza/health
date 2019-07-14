@@ -259,7 +259,7 @@ syntax, filename(string)
 		isid id_m id_b		
 		keep id_m id_b control partner_fem partner child civs typben codrel region munici dod_m pais_m	
 	}
-	if "`filename'" == "hiv_did" {
+	if "`filename'" == "hiv_fam" {
 		keep if hiv==1
 		keep id_m id_b month isapre partner_fem partner child civs typben codrel region munici dod_m pais_m	
 	}
@@ -291,7 +291,7 @@ program              enrolled
 	drop index
 	duplicates drop
 	bys id_m id_b: egen n_m = count(month)
-	drop if n_m<21
+	drop if n_m<24
 	/* * Consecutive months
 	egen id = group(id_m id_b)
 	gen Month = mofd(date(string(month),"YM"))
