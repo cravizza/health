@@ -77,8 +77,11 @@ def main():
     
     print('\n-- Families of hiv testers')
     interm  = pd.merge(hiv_fam0, dfb, how='left', on=['month','id_m'])
+    del hiv_fam0
     interm  = interm.loc[interm['isapre'].notnull()] 
     hiv_fam = pd.merge(interm, hiv_ids2, how='left', on=['month','id_m','id_b'])
+    del interm
+    del hiv_ids2
     hiv_fam['hiv'].fillna(0, inplace=True)
     for c in ['hiv','isapre']:
         hiv_fam[c] = hiv_fam[c].astype('int8')
@@ -90,10 +93,18 @@ def main():
     hiv_fam.info(memory_usage='deep')
     hiv_fam.to_stata('../output/hiv_fam.dta')
     del hiv_fam
-    del interm
-    del hiv_fam0
-    del hiv_ids2
     
+    print('\n-- Enrollment of hiv testers')
+    hiv_ids3 = hiv_ids[['id_m','id_b']].drop_duplicates()
+    hiv_dfb  = dfb[['id_m','id_b','month']].drop_duplicates()
+    hiv_enr = pd.merge(hiv_ids3, hiv_dfb, how='left', on=['id_m','id_b'])
+    del hiv_ids3
+    del hiv_dfb
+    hiv_enr.reset_index(drop=True,inplace=True)
+    hiv_enr.info(memory_usage='deep')
+    hiv_enr.to_stata('../output/hiv_enr.dta')
+    del hiv_enr
+
     print('\n-- Pbon of hiv testers')
     hiv_pbon = pd.merge(hiv_ids, dfp, how='left', on=['id_m','id_b','month'])
     for c in ['code','code2','code7']:
@@ -113,6 +124,7 @@ def main():
     hiv_conf.reset_index(drop=True,inplace=True)
     hiv_conf.info(memory_usage='deep')
     hiv_conf.to_stata('../output/hiv_conf.dta')
+    del hiv_conf
     
     print('\n-- Difference-in-differences')
     hiv_ids['N'] = hiv_ids.groupby(['id_m','id_b'])['month'].transform('count')
@@ -134,9 +146,13 @@ def main():
     print('\n-- Families of did sample')
     did_fam0 = hiv_did[['id_m']].drop_duplicates()
     did_ids2 = hiv_did[['id_m','id_b','control']].drop_duplicates()
+    del hiv_did
     interm  = pd.merge(did_fam0, dfb.loc[dfb['month'].between(201601,201712)], how='left', on=['id_m'])
+    del did_fam0
     interm  = interm.loc[interm['isapre'].notnull()] 
     did_fam = pd.merge(interm, did_ids2, how='left', on=['id_m','id_b'])
+    del interm
+    del did_ids2
     did_fam['control'].fillna(9, inplace=True)
     for c in ['control','isapre']:
         did_fam[c] = did_fam[c].astype('int8')
@@ -149,10 +165,6 @@ def main():
     did_fam.loc[did_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_did_enr.dta')
     did_fam.loc[did_fam['month']==201708].to_stata('../output/hiv_did_fam.dta')
     del did_fam
-    del interm
-    del did_fam0
-    del did_ids2
-    del hiv_did
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
