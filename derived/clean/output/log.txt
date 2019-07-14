@@ -3,11 +3,11 @@ Logging: health\derived\clean\code
 
 
 -- Executing: health\derived\clean\code/hiv.py
--- Timestamp: 2019-07-13 16:19:04
+-- Timestamp: 2019-07-14 12:55:34
 
 -- Time elapsed load and concat: 56 sec.
 
--- Time elapsed load and concat: 225 sec.
+-- Time elapsed load and concat: 222 sec.
 
 -- Time elapsed load: 0 sec.
 
@@ -43,6 +43,16 @@ typben    1473620 non-null category
 hiv       1473620 non-null int8
 dtypes: category(5), int32(5), int8(2), object(2)
 memory usage: 162.0 MB
+
+-- Enrollment of hiv testers
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 29221408 entries, 0 to 29221407
+Data columns (total 3 columns):
+id_m     int32
+id_b     int32
+month    int32
+dtypes: int32(3)
+memory usage: 334.4 MB
 
 -- Pbon of hiv testers
 <class 'pandas.core.frame.DataFrame'>
@@ -143,24 +153,24 @@ control    1464208 non-null int8
 dtypes: category(5), int32(5), int8(2), object(2)
 memory usage: 161.0 MB
 
--- Timestamp: 2019-07-13 16:38:38
+-- Timestamp: 2019-07-14 13:18:57
 
 
 
 
 -- Executing: health\derived\clean\code/seasonality.py
--- Timestamp: 2019-07-13 16:14:46
+-- Timestamp: 2019-07-14 12:51:20
 
--- Time elapsed load and concat: 97 sec.
+-- Time elapsed load and concat: 96 sec.
 
 
--- Timestamp: 2019-07-13 16:18:55
+-- Timestamp: 2019-07-14 12:55:25
 
 
 
 
 -- Executing: health\derived\clean\code/solicitudges.py
--- Timestamp: 2019-07-13 16:18:57
+-- Timestamp: 2019-07-14 12:55:27
 
 -- Dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -224,4 +234,4 @@ month        35504
 icd10hiv      8876
 dtype: int64
 
--- Timestamp: 2019-07-13 16:19:03
+-- Timestamp: 2019-07-14 12:55:33
