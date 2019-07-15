@@ -12,7 +12,7 @@ program main
 	set graphics off
 	
 	use ..\temp\hiv_tests.dta, clear
-	es_c5, time(Week) window(10) r_var(male)
+	keep if enr==1
 	hist_copay_age
 	testing_and_gt
 	forval c = 1/5 {
@@ -30,9 +30,7 @@ program main
 	trends_by_var, time(Week)  r_var(male)  by_var(child)
 
 	use ..\temp\hiv_pbon.dta, clear
-	keep if male==1
-	es_c5, time(Week) window(10) r_var(i_hemogra)
-	es_c5, time(Week) window(10) r_var(i_syphili)
+	keep if male==1 & enr==1
 	sb_test, campaign(1) time(Week) r_var(i_hemogra)
 	sb_test, campaign(5) time(Week) r_var(i_hemogra)
 	sb_test, campaign(1) time(Week) r_var(i_syphili)
@@ -47,46 +45,6 @@ program main
 	interval_test_conf
 
 	set graphics on
-end
-
-capture program drop es_c5
-program es_c5
-syntax, time(varname) r_var(varname) window(int)
-	preserve
-		collapse (count) tests2=age if `r_var'==1, by(`time')
-		gen  `time'no = week(dofw(`time'))
-		qui reg tests2 i.`time'no
-		predict resid, residuals
-		gen tests = _b[_cons] + resid		
-		lab var tests2 "Number of tests"
-		lab var tests "Number of tests (deseas.)"
-		keep if Week>=tw(2015w1)
-		gen b = Week - tw(2015w1) 
-		local ic0 = word("${hiv_`time'}",-1)
-		gen t = `time' - tw(`ic0') + `window' + 1 if inrange(Week,tw(`ic0')-`window',tw(`ic0')+`window')
-		replace t = 0 if mi(t)
-		local N = 2*`window' + 1
-		local modN = floor(`N'/4)
-		forval i = 1/`N' {
-			if mod(`i',`modN')==1 {
-				qui sum Week if t==`i'
-				local ti : di %tw `r(mean)'
-				local labs = `"`labs'"' + `" `i' "`ti'" "'
-			}
-		}
-		reg tests b i.t // a* w*
-		local bd  = stritrim(string(int(_b[b]*100)/100))
-		local SEb = stritrim(string(int(_se[b]*100)/100))
-		local co  = stritrim(string(int(_b[_cons])))
-		local SEc = stritrim(string(int(_se[_cons])))
-		local xl = `window'+0.5
-		local ny = `window'*0.7
-		local nx = _b[12.t] + 2* _se[12.t]
-
-		coefplot, vertical ${wb} drop(_cons b) ciopts(lc(midgreen)) mc(midgreen) xtitle("`time_label'") xlabel(`labs') xline(`xl', lc(black) lp(dash)) ///
-			ttext(`nx' `ny' "Constant: `co' (`SEc')""Slope: `bd' (0`SEb')", place(sw) box just(center) margin(l+1 t+1 b+1 r+2) width(30) )
-		graph export ../output/es_`r_var'_`window'_`time'.pdf, replace
-	restore
 end
 
 capture program drop sb_test

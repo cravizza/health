@@ -5,6 +5,7 @@ clear all
 set more off
 
 program main
+	*enrolled
 	foreach filename in  "hiv_fam" "hiv_did_fam" {
 		clean_families, filename(`filename')
 	}
@@ -15,6 +16,7 @@ program main
 	save ..\temp\hiv_pbon_conf.dta, replace
 	
 	use "..\..\..\derived\clean\output\hiv_pbon.dta", clear
+	merge m:1 id_b id_m using ..\temp\hiv_enr.dta, nogen keep(3)
 	clean_pbon_time
 	keep if date_hiv==date_pb & n_hiv_test==1
 	drop n_hiv_test date_hiv
@@ -36,11 +38,10 @@ program main
 	label values child child
 	save ..\temp\hiv_tests.dta, replace
 	
-	enrolled
 	use "..\..\..\derived\clean\output\hiv_did.dta", clear
 	clean_pbon_time	
 	create_demo_vars
-	merge m:1 id_b id_m using ..\temp\enrolled.dta   , nogen keep(3)
+	merge m:1 id_b id_m using ..\temp\hiv_did_enr.dta   , nogen keep(3)
 	merge m:1 id_b id_m using ..\temp\hiv_did_fam.dta, nogen keep(3)
 	bys id_m id_b: egen date_hivm = min(date_hiv)
 	format %td date_hivm
@@ -310,7 +311,29 @@ program              enrolled
 	keep id_m id_b 
 	duplicates drop
 	gen enr = 1
-	save ..\temp\enrolled.dta, replace
+	save ..\temp\hiv_did_enr.dta, replace
+	
+	use "..\..\..\derived\clean\output\hiv_enr.dta", clear
+	drop index
+	bys id_m id_b: egen n_m = count(month) //58.31%=72
+	gen enr = (n_m==72)	
+	forvalues x=2012/2017 {
+		local m_s = `x'*100
+		local m_e = (`x'+1)*100
+		di "Year `x'"
+		bys id_m id_b: egen n_m`x'pre = count(month) if inrange(month,`m_s',`m_e')
+		replace n_m`x'pre = 0 if mi(n_m`x'pre)
+		bys id_m id_m: egen n_m`x' = max(n_m`x'pre)
+		drop n_m`x'pre
+	}
+	tab enr
+	gen enr_7_12 = (inrange(n_m2017,7,12) & inrange(n_m2016,7,12) & inrange(n_m2015,7,12) & inrange(n_m2014,7,12) & inrange(n_m2013,7,12) & inrange(n_m2012,7,12))
+	tab enr if enr_7_12==1
+	gen enr5 = (n_m2016==12 & n_m2017==12)
+	
+	drop month n_m2012 n_m2013 n_m2014 n_m2015
+	duplicates drop
+	save ..\temp\hiv_enr.dta, replace
 end
 
 main
