@@ -44,11 +44,12 @@ program main
 	lab var vihsidachile "HIV/AIDS"
 	lab var sifilischile "Syphilis"
 	sort Week
+	keep if inrange(Week,tw(2016w1),tw(2018w1))
 	tw (line vihexam Week, lc(midgreen)) (line sifexam Week, lc(purple)) ///
-		, ${wb} ${hiv_Week_tlinelab} yt("Google trends index") // legend(on order(1))
+		, ${wb} ${hiv5_Week_tlinelab} yt("Google trends index") // legend(on order(1))
 	graph export ..\output\gt_vihexamen_Week.pdf, replace
 	tw (line vihsida Week, lc(midgreen)) (line sifilis Week, lc(purple)) ///
-		, ${wb} ${hiv_Week_tlinelab} yt("Google trends index")
+		, ${wb} ${hiv5_Week_tlinelab} yt("Google trends index")
 	graph export ..\output\gt_vihsifilis_Week.pdf, replace
 end
 
