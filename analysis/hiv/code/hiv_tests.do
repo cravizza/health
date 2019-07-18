@@ -23,14 +23,14 @@ program main
 		trends_by_var, time(Week) r_var(male)  by_var(`byvar')
 	}
 	
-/*	use ..\temp\hiv_pbon.dta, clear
+	use ..\temp\hiv_pbon.dta, clear
 	keep if male==1 & enr==1
-	sb_test, campaign(1) time(Week) r_var(i_hemogra)
-	sb_test, campaign(5) time(Week) r_var(i_hemogra)
-	sb_test, campaign(1) time(Week) r_var(i_syphili)
-	sb_test, campaign(5) time(Week) r_var(i_syphili)
-	trends_by_var, time(Week)  r_var(male)      by_var(tests1)
-	trends_by_var, time(Week)  r_var(male)      by_var(tests2)
+	sb_test, time(Week) r_var(i_hemogra) campaign(5)
+	sb_test, time(Week) r_var(i_syphili) campaign(5)
+	es_2017, time(Week) r_var(i_hemogra) window(15)	
+	es_2017, time(Week) r_var(i_syphili) window(15)	
+/*	trends_by_var, time(Week) r_var(male) by_var(tests1)
+	trends_by_var, time(Week) r_var(male) by_var(tests2)
 	interval_test_conf
 */
 	set graphics on
@@ -68,11 +68,12 @@ syntax, time(varname) r_var(varname) window(int)
 		}
 		lab def t_labs  `labs'
 		lab val t      t_labs
-		local xl = `window'+0.5		
-
+		local xl = `window'+0.5
+		local x2 = `window'-0.5
+		local x3 = `window'-1.5
 		coefplot, vertical ${wb} drop(_cons *.Year *.`time'no b) ciopts(lc(midgreen)) ///
 			mc(midgreen) xtitle("`time_label'") ///
-			xlabel(`labs') xline(`xl', lc(black) lp(dash))	
+			xlabel(`labs') xline(`xl', lc(black) lp(dash))	 xline(`x2' `x3', lc(gs8) lp(shortdash))
 		graph export ../output/es5_`r_var'_`window'_`time'.pdf, replace
 		* Create table with and without trend
 		local FE1 = " b"
@@ -224,7 +225,7 @@ program trend_year
 	preserve
 		collapse (count) tst=gender if male==1 & age_18_45==1, by(age Year)  
 		lab var tst "Number of HIV tests"
-		tw (line tst age if Year==2016, lc(orange)   lp(dash)) ///
+		tw (line tst age if Year==2016, lc(purple)   lp(dash)) ///
 		   (line tst age if Year==2017, lc(midgreen) lp(longdash)) ///
 			, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2))			 
 			graph export "..\output\trend_yr_age_18_45_male_by_year.pdf", replace
@@ -233,7 +234,7 @@ program trend_year
 		keep if inrange(Week,tw(2016w31),tw(2016w34)) | inrange(Week,tw(2017w31),tw(2017w34))
 		collapse (count) tst=gender if male==1 & age_18_45==1, by(age Year)  
 		lab var tst "Number of HIV tests"
-		tw (line tst age if Year==2016, lc(orange)   lp(dash)) ///
+		tw (line tst age if Year==2016, lc(purple)   lp(dash)) ///
 		   (line tst age if Year==2017, lc(midgreen) lp(longdash)) ///
 			, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2))			 
 			graph export "..\output\trend_yr_age_18_45_male_by_yearweek.pdf", replace
