@@ -22,6 +22,12 @@ program main
 	drop n_hiv_test date_hiv
 	create_demo_vars
 	create_health_vars
+	* Code groups
+	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
+	* Outcomes
+	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" {
+		gen y_`x' = (code_type == "`x'")	
+	}
 	save ..\temp\hiv_pbon.dta, replace
 	
 	keep if i_hiv==1
@@ -47,6 +53,12 @@ program main
 	format %td date_hivm
 	bys id_m id_b : egen n_hiv_tests = max(n_hiv_test)
 	assert (!mi(date_hivm) & control==0) | (mi(date_hivm) & control==1)
+	* Code groups
+	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
+	* Outcomes
+	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" {
+		gen y_`x' = (code_type == "`x'")	
+	}
 	save ..\temp\hiv_did.dta, replace
 end
 
