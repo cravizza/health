@@ -130,7 +130,7 @@ def main():
     hiv_ids['N'] = hiv_ids.groupby(['id_m','id_b'])['month'].transform('count')
     df = hiv_ids.loc[hiv_ids['N']<10].copy()
     df['m'] = df.groupby(['id_m','id_b'])['month'].transform('min')
-    hiv_t = df.loc[df['month'].between(201708,201709),['id_m','id_b','N','m']]
+    hiv_t = df.loc[df['month'].between(201707,201709),['id_m','id_b','N','m']]
     hiv_t['control'] = 0
     hiv_did = pd.merge(hiv_t, dfp.loc[dfp['month'].between(201601,201712)], how='left', on=['id_m','id_b'])
     del hiv_t

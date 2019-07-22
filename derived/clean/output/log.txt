@@ -3,11 +3,11 @@ Logging: health\derived\clean\code
 
 
 -- Executing: health\derived\clean\code/hiv.py
--- Timestamp: 2019-07-14 12:55:34
+-- Timestamp: 2019-07-22 13:03:38
 
 -- Time elapsed load and concat: 56 sec.
 
--- Time elapsed load and concat: 222 sec.
+-- Time elapsed load and concat: 220 sec.
 
 -- Time elapsed load: 0 sec.
 
@@ -106,7 +106,7 @@ memory usage: 9.5 MB
 
 -- Difference-in-differences
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 1993776 entries, 0 to 1993775
+RangeIndex: 2876874 entries, 0 to 2876873
 Data columns (total 21 columns):
 id_m        int32
 id_b        int32
@@ -130,47 +130,47 @@ code2       object
 code7       object
 pregnant    int8
 dtypes: category(8), int32(5), int64(2), int8(3), object(3)
-memory usage: 357.6 MB
+memory usage: 516.0 MB
 
 -- Families of did sample
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 1464208 entries, 0 to 1464207
+RangeIndex: 2042744 entries, 0 to 2042743
 Data columns (total 14 columns):
-id_m       1464208 non-null int32
-month      1464208 non-null int32
-isapre     1464208 non-null int8
-id_b       1464208 non-null int32
-dob        1464208 non-null int32
-dod_m      1464208 non-null int32
-gender     1464208 non-null category
-civs_m     1464208 non-null category
-pais_m     1464208 non-null category
-munici     1464208 non-null object
-region     1464208 non-null object
-codrel     1464208 non-null category
-typben     1464208 non-null category
-control    1464208 non-null int8
+id_m       int32
+month      int32
+isapre     int8
+id_b       int32
+dob        int32
+dod_m      int32
+gender     category
+civs_m     category
+pais_m     category
+munici     object
+region     object
+codrel     category
+typben     category
+control    int8
 dtypes: category(5), int32(5), int8(2), object(2)
-memory usage: 161.0 MB
+memory usage: 224.6 MB
 
--- Timestamp: 2019-07-14 13:18:57
+-- Timestamp: 2019-07-22 13:26:41
 
 
 
 
 -- Executing: health\derived\clean\code/seasonality.py
--- Timestamp: 2019-07-14 12:51:20
+-- Timestamp: 2019-07-22 12:59:32
 
--- Time elapsed load and concat: 96 sec.
+-- Time elapsed load and concat: 95 sec.
 
 
--- Timestamp: 2019-07-14 12:55:25
+-- Timestamp: 2019-07-22 13:03:30
 
 
 
 
 -- Executing: health\derived\clean\code/solicitudges.py
--- Timestamp: 2019-07-14 12:55:27
+-- Timestamp: 2019-07-22 13:03:32
 
 -- Dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -234,4 +234,4 @@ month        35504
 icd10hiv      8876
 dtype: int64
 
--- Timestamp: 2019-07-14 12:55:33
+-- Timestamp: 2019-07-22 13:03:37
