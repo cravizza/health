@@ -5,6 +5,7 @@ clear all
 set more off
 
 program main
+	qui do ..\globals.do
 	*enrolled
 	foreach filename in  "hiv_fam" "hiv_did_fam" {
 		clean_families, filename(`filename')
@@ -25,7 +26,7 @@ program main
 	* Code groups
 	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
 	* Outcomes
-	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" {
+	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" "diagther" "surgery" "drcancer" "imaging" {
 		gen y_`x' = (code_type == "`x'")	
 	}
 	save ..\temp\hiv_pbon.dta, replace
@@ -49,15 +50,16 @@ program main
 	create_demo_vars
 	merge m:1 id_b id_m using ..\temp\hiv_did_enr.dta   , nogen keep(3)
 	merge m:1 id_b id_m using ..\temp\hiv_did_fam.dta, nogen keep(3)
-	bys id_m id_b: egen date_hivm = min(date_hiv)
+	bys id_m id_b: egen date_hivm = min(date_hiv) if date_hiv>=td(${hiv5_Day_R})
+	bys id_m id_b (date_hivm):  replace date_hivm = date_hivm[1] if mi(date_hivm)
 	format %td date_hivm
 	bys id_m id_b : egen n_hiv_tests = max(n_hiv_test)
 	assert (!mi(date_hivm) & control==0) | (mi(date_hivm) & control==1)
 	* Code groups
 	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
 	* Outcomes
-	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" {
-		gen y_`x' = (code_type == "`x'")	
+	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" "diagther" "surgery" "drcancer" "imaging" {
+		gen y_`x' = (code_type == "`x'")
 	}
 	save ..\temp\hiv_did.dta, replace
 end

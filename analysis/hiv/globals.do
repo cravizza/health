@@ -23,10 +23,16 @@
 	
 
 * Dates 2017 campaign
-	global hiv5_unaids       =  "2017w29"
-	global hiv5_announ       =  "2017w30"
-	global hiv5_launch       =  "2017w31"	
-	global hiv5_Week         =  "2017w29        2017w30        2017w31"
-	global hiv5_Week_lab       `"2017w29 "R" 2017w30 "A" 2017w31 "L""'
+	global hiv5_Day_R        =  "20Jul2017"
+	global hiv5_Day_A        =  "28Jul2017"
+	global hiv5_Day_L        =  "03Aug2017"
+	global hiv5_Week_R       =  "2017w29"
+	global hiv5_Week_A       =  "2017w30"
+	global hiv5_Week_L       =  "2017w31"
+	global hiv5_Day             "20Jul2017     28Jul2017     03Aug2017"
+	global hiv5_Day_lab        `"20Jul2017 "R" 28Jul2017 "A" 03Aug2017 "L""'
+	global hiv5_Week         =  "2017w29       2017w30       2017w31"
+	global hiv5_Week_lab       `"2017w29   "R" 2017w30   "A" 2017w31 "L""'
+	global hiv5_Day_tlinelab    = `"tline(20Jul2017 28Jul2017 03Aug2017, lc(black) lp(dash)) tmlab(${hiv5_Day_lab}, tp(inside) labs(*0.9) labgap(*.3))"'
 	global hiv5_Week_tlinelab = `"tline(2017w29 2017w30, lc(gs8) lp(shortdash)) tline(2017w31, lc(black) lp(dash)) tmlab(${hiv5_Week_lab}, tp(inside) labs(*0.9) labgap(*.3))"'
  
