@@ -2,7 +2,15 @@ raw/
 *.gph
 *.dta
 *.png
+*.pdf
+*.pyc
 tables/
 figures/
 temp/
+
+## Tex aux files
+#draft/**/*.log
+#*.aux
+#*.synctex.gz
+#*.synctex.gz(busy)
 draft/
