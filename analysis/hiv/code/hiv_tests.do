@@ -52,7 +52,7 @@ syntax, time(varname) r_var(varname) window(int)
 		tw line tests `time' if inrange(Year,2016,2017), ${wb} ${hiv5_`time'_tlinelab} lc(midgreen)
 		graph export ../output/trend5_`r_var'_`time'.pdf, replace
 		gen  `time'no = week(dofw(`time'))
-		gen t = cond(inrange(Week,tw(${hiv5_launch})-`window',tw(${hiv5_launch})+`window'),`time' - tw(${hiv5_launch}) + `window' + 1,0)
+		gen t = cond(inrange(Week,tw(${hiv5_`time'_L})-`window',tw(${hiv5_`time'_L})+`window'),`time' - tw(${hiv5_`time'_L}) + `window' + 1,0)
 		gen b = Week - tw(2012w1)
 
 		reg tests b i.t i.`time'no i.Year
@@ -225,20 +225,32 @@ program trend_year
 	preserve
 		collapse (count) tst=gender if male==1 & age_18_45==1, by(age Year)  
 		lab var tst "Number of HIV tests"
+		qui sum tst
+		local maxr = ceil(`r(max)'/200)*200
+		local maxI = `maxr'/4
 		tw (line tst age if Year==2016, lc(purple)   lp(dash)) ///
 		   (line tst age if Year==2017, lc(midgreen) lp(longdash)) ///
-			, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2))			 
+			, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2)) ylab(0(`maxI')`maxr')
 			graph export "..\output\trend_yr_age_18_45_male_by_year.pdf", replace
 	restore
-	preserve
-		keep if inrange(Week,tw(2016w31),tw(2016w34)) | inrange(Week,tw(2017w31),tw(2017w34))
-		collapse (count) tst=gender if male==1 & age_18_45==1, by(age Year)  
-		lab var tst "Number of HIV tests"
-		tw (line tst age if Year==2016, lc(purple)   lp(dash)) ///
-		   (line tst age if Year==2017, lc(midgreen) lp(longdash)) ///
-			, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2))			 
-			graph export "..\output\trend_yr_age_18_45_male_by_yearweek.pdf", replace
-	restore
+	local wS = "w12 w31"
+	local wE = "w28 w47"
+	forv x = 1/2 {
+		local ws: word `x' of `wS'
+		local we: word `x' of `wE'
+		preserve
+			keep if inrange(Week,tw(2016`ws'),tw(2016`we')) | inrange(Week,tw(2017`ws'),tw(2017`we'))
+			collapse (count) tst=gender if male==1 & age_18_45==1, by(age Year)  
+			lab var tst "Number of HIV tests"
+			qui sum tst
+			local maxr = ceil(`r(max)'/50)*50
+			local maxI = `maxr'/5
+			tw (line tst age if Year==2016, lc(purple)   lp(dash)) ///
+			   (line tst age if Year==2017, lc(midgreen) lp(longdash)) ///
+				, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2)) ylab(0(`maxI')`maxr')
+				graph export "..\output\trend_yr_age_18_45_male_by_year_`ws'`we'.pdf", replace
+		restore
+	}
 end
 
 main

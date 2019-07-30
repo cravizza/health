@@ -37,7 +37,8 @@ program main
 	merge m:1 id_m id_b month isapre using ..\temp\hiv_fam.dta      , keep(1 3) nogen
 	merge m:1 id_m id_b              using ..\temp\hiv_conf_date.dta, keep(1 3) nogen
 	gen married = (partner==1) if child!=1 & inlist(civs,1,2)
-	label define married 0 "Single" 1 "Married"
+	replace married = 2 if child!=1 & civs==0
+	label define married 0 "Single" 1 "Married" 2 "Unknown"
 	label values married married
 	replace child = 0 if typben==0
 	replace child = . if age_male!=1
@@ -117,21 +118,21 @@ program              create_demo_vars
 	label define age_groups `age_groups'
 	label values age_male    age_groups
 	label values age_female  age_groups	
-	local start_list = "15 20 25 30 35 40 45 50"
-	local   end_list = "19 24 29 34 39 44 59 60"
+	local start_a_list = "15 20 25 30 35 40 45 50"
+	local   end_a_list = "19 24 29 34 39 44 59 60"
 	gen age_a_male =.
 	gen age_a_female =.
 	local N = `: word count `start_list''
-	local age_groups = ""
+	local age_a_groups = ""
 	forv x = 1(1)`N' {
-		local s1: word `x' of `start_list'
-		local e1: word `x' of   `end_list'
-		local age_groups = `"`age_groups'"' + `" `x' "`s1'_`e1'" "'
+		local s1: word `x' of `start_a_list'
+		local e1: word `x' of   `end_a_list'
+		local age_a_groups = `"`age_a_groups'"' + `" `x' "`s1'_`e1'" "'
 		replace   age_a_male = `x' if gender==1 & inrange(age,`s1',`e1')
 		replace age_a_female = `x' if gender==0 & inrange(age,`s1',`e1')
 	}
-	capture label drop age_groups
-	label define age_groups `age_groups'
+	capture label drop age_a_groups
+	label define age_a_groups `age_a_groups'
 	label values age_a_male    age_groups
 	label values age_a_female  age_groups
 	* Regions
