@@ -9,41 +9,41 @@ program main
 	create_sample
 	*keep if N<4 & m>201415
 	
+	global controls = " civs N municiid regionid "
 	use ..\temp\hiv_did_dates.dta, clear
 	drop if date_hivm2>=td(10Sep2017)
-	local timew    = "Week"
-	local timem    = "Month"
-	local typem    = "max"
-	local types    = "sum"
-	local r_var    = "age_a_male"
-	local outcomes =     "y_docvisit y_spevisit y_prevscre y_diagther y_surgery  y_hospital y_labblood y_laburine y_imaging"
-	local lab_outcomes `""Doctor visit" "Specialist visit" "Preventive care" "Diagnosis/therapy" " Surgery" "Hospitalization" "Blood test" "Urine test" "Imaging""'
+	local timew = "Week"
+	local timem = "Month"
+	local tmax  = "max"
+	local tsum  = "sum"
+	local rvar  = "age_a_male"
+	local yvars = "y_docvisit      y_spevisit          y_prevscre        y_diagther " ///
+	            + "y_surgery       y_hospital          y_labblood        y_laburine   y_imaging"
+	local ylabs = `""Doctor visit" "Specialist visit"  "Preventive care" "Diagnosis/therapy" "' ///
+	            + `""Surgery"      "Hospitalization"   "Blood test"      "Urine test" "Imaging""'
 	
 	set graphics off
-	es_dynamic, time(`timew') r_var(`r_var') outcomes(`outcomes') type(`typem')
-	es_dynamic, time(`timem') r_var(`r_var') outcomes(`outcomes') type(`typem')
-	es_dynamic, time(`timew') r_var(`r_var') outcomes(`outcomes') type(`types')
-	es_dynamic, time(`timem') r_var(`r_var') outcomes(`outcomes') type(`types')
+	es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tmax')
+	es_dynamic, time(`timem') r_var(`rvar') y_vars(`yvars') type(`tmax')
+	es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tsum')
+	es_dynamic, time(`timem') r_var(`rvar') y_vars(`yvars') type(`tsum')
 	set graphics on
 	
-	es_static, r_var(`r_var') outcomes(`outcomes') type(`typem') lab_outcomes(`"`lab_outcomes'"')
-	es_static, r_var(`r_var') outcomes(`outcomes') type(`types') lab_outcomes(`"`lab_outcomes'"')
+	es_static, r_var(`rvar') y_vars(`yvars') type(`tmax') y_labs(`"`ylabs'"')
+	es_static, r_var(`rvar') y_vars(`yvars') type(`tsum') y_labs(`"`ylabs'"')
 end
 
 capture program drop es_static
 program              es_static	
-syntax, r_var(varname) outcomes(varlist) type(str) lab_outcomes(str)
+syntax, r_var(varname) y_vars(varlist) type(str) y_labs(str)
 	preserve
 		drop if mi(post_static) // exclude any services on the day of the test
 		drop if mi(`r_var')
 		sort id_b id_m date_pb `r_var'
-		collapse (`type') `outcomes' (mean) control (firstnm) `r_var' civs N municiid regionid date_hivm2, by(id_m id_b post_static)
+		collapse (`type') `y_vars' (mean) control (firstnm) `r_var' ${controls} date_hivm2 ///
+			, by(id_m id_b post_static)
 		assert !mi(id_b) & !mi(id_m) & ! mi(post)
-		foreach x in `outcomes' { // adjust for different lenght of pre and post
-			replace `x' = `x'/24 if post==0
-			replace `x' = `x'/16 if post==1
-		}
-		* Create a balanced panel (with all controls) and fill with zeros if no service
+		* Create a balanced panel (w/all controls) and fill w/zero if no service
 		egen id = group(id_m id_b)
 		xtset id post
 		tsfill, full
@@ -54,7 +54,7 @@ syntax, r_var(varname) outcomes(varlist) type(str) lab_outcomes(str)
 			replace `x' = _temp if `x'==-99
 			drop _temp
 		}
-		foreach x in `outcomes' {
+		foreach x in `y_vars' {
 			replace `x' = 0 if mi(`x')
 		}
 		* Run regressions and create locals
@@ -62,27 +62,21 @@ syntax, r_var(varname) outcomes(varlist) type(str) lab_outcomes(str)
 		rename post P
 		local FE1 = " i.region"
 		local FE2 = " i.munici"
-		local words: word count `outcomes'
+		local words: word count `y_vars'
 		forval w = 1/`words' {
-			local y: word `w' of `outcomes'
+			local y: word `w' of `y_vars'
 			replace `y' = 0 if mi(`y')
 			forval x=0/2 { 
 				qui reg `y' P i.`r_var' i.civs i.N `FE`x''
 				local `w'_Pb_`x': di %5.4f _b[P]
 				local `w'_Pp_`x': di %5.3f (2*ttail(e(df_r), abs(_b[P]/_se[P])))
-				if "`type'" == "sum" { // adjust for different lenght of pre and post
-					qui sum `y' if P==0 //*CHECK
-					local `w'_avg : di %5.4f `r(mean)'/24 //*CHECK
-				}
-				else {
-					qui sum `y' if P==0 //*CHECK
-					local `w'_avg : di %5.4f `r(mean)' //*CHECK
-				}
+				qui sum `y' if P==0
+				local `w'_avg : di %5.4f `r(mean)'
 			}
 		}
 		forval w = 1/`words' {
-			local y: word `w' of `outcomes'
-			local lab_`w':  word `w' of `lab_outcomes'
+			local y: word `w' of `y_vars'
+			local lab_`w':  word `w' of `y_labs'
 			di "`y' : `lab_`w'' ***"
 			forval x=0/2 {
 				di "``w'_Pb_`x''  (``w'_Pp_`x'') "
@@ -94,12 +88,12 @@ syntax, r_var(varname) outcomes(varlist) type(str) lab_outcomes(str)
 						_n "\begin{tabular}{@{}l|c|ccc@{}} \hline\hline"  ///
 						_n " Outcomes & Pre mean & (1) & (2) & (3) \\ \hline"
 		forval w = 1/`words' {
-			local lab_`w':  word `w' of `lab_outcomes'
+			local lab_`w':  word `w' of `y_labs'
 			file write myfile _n " `lab_`w'' & ``w'_avg' &  ``w'_Pb_0'  &  ``w'_Pb_1'  &  ``w'_Pb_2'  \\ " ///
 							  _n "           &           & (``w'_Pp_0') & (``w'_Pp_1') & (``w'_Pp_2') \\ " 
 		}
 		file write myfile _n "\hline Region FE & & No & Yes & No  \\ " ///
-						  _n " Munici FE       & & No & No  & Yes \\ " ///
+						  _n " Municipality FE & & No & No  & Yes \\ " ///
 						  _n "\hline\hline" _n "\end{tabular}"
 		file close myfile
 	restore
@@ -107,38 +101,41 @@ end
 
 capture program drop es_dynamic
 program              es_dynamic	
-syntax, time(varname) r_var(varname) outcomes(varlist) type(str)
+syntax, time(varname) r_var(varname) y_vars(varlist) type(str)
 	preserve
-		drop if date_hivm == date_pb // exclude any services on the day of the test
+		drop if date_hivm == date_pb // exclude any servs on the day of the test
 		drop if mi(`r_var')
 		sort id_b id_m date_pb `r_var'
-		collapse (`type') `outcomes' (mean) control (firstnm) `r_var' civs N municiid regionid, by(id_m id_b post_`time')
+		collapse (`type') `y_vars' (mean) control (firstnm) `r_var' ${controls} Week ///
+			, by(id_m id_b post_`time')
 		assert !mi(id_b) & !mi(id_m) & ! mi(post)
-		* Create a balanced panel (with all controls) and fill with zeros if no service
+		* Create a balanced panel (w/all controls) and fill w/zero if no service
 		egen id = group(id_m id_b)
 		qui xtset id post
 		tsfill, full
 		xtset id post
-		foreach x in control `r_var' N civs municiid regionid {
+		foreach x in control `r_var' ${controls} {
 			replace `x' = -99 if mi(`x')
 			bys id: egen _temp = max(`x')
 			replace `x' = _temp if `x'==-99
 			drop _temp
 		}
-		foreach x in `outcomes' {
+		foreach x in `y_vars' {
 			replace `x' = 0 if mi(`x')
 		}
-		* Panel span: Week=(-25,11); Month=(-7,4); drop first and last of graphs
+		* Panel span: Week=(-25,13); Month=(-7,4); drop first and last of graphs
 		if "`time'"=="Week" {
 			replace post=-25 if post<-24
-			replace post= 11 if post> 10
-			local cp_drop = "1.i_post 37.i_post" // 37=25+11+1
+			replace post= 13 if post> 12
+			local cp_drop = "1.i_post 39.i_post" // 39=25+13+1
+			gen `time'no = week(dofw(Week))
 		}
 		else if "`time'"=="Month" {
 			replace post=-7 if post<-6
 			replace post= 4 if post> 3
 			local cp_drop = "1.i_post 12.i_post"
 			local cp_xlab = ""
+			gen `time'no = month(dofw(Week))
 		}
 		* Create post indicator with labels, and labels for Week plot
 		qui sum post
@@ -152,7 +149,7 @@ syntax, time(varname) r_var(varname) outcomes(varlist) type(str)
 		label define post_labs `post_labs'
 		label values i_post  post_labs
 		if "`time'"=="Week" {
-			forval i = 1/36 {
+			forval i = 1/39 {
 				if mod(`i',4)==1 { // yields labs every 4 dates
 					qui sum post if i_post==`i'+1
 					local cp_labs = `"`cp_labs'"' + `" `i' "`r(mean)'" "'
@@ -161,12 +158,14 @@ syntax, time(varname) r_var(varname) outcomes(varlist) type(str)
 			local cp_xlab = `"xlab(`cp_labs')"'
 		}
 		* Run regressions and create plots
-		local coefplot_opts = " vertical baselevels graphregion(color(white)) bgcolor(white) " ///
-		                     + " mc(midgreen) ciopts(lc(midgreen)) yli(0, lc(gs12))"
-		foreach outcome in `outcomes' {
-			reg `outcome' i.i_post i.`r_var' i.civs i.N i.region
+		qui sum i_post if post==0
+		local x0 = `r(mean)' - 0.5 - 1 // -1 since we drop first coefficient
+		local coefplot_opts = " vertical baselevels ${wb} yli(0, lc(gs12)) " ///
+		       + " xline(`x0', lc(black) lp(dot)) mc(midgreen) ciopts(lc(midgreen))"
+		foreach outcome in `y_vars' {
+			reg `outcome' i.i_post i.`r_var' i.civs i.N i.region i.`time'no
 			coefplot, `coefplot_opts' xtitle("`time_label'")  `cp_xlab' ///
-				drop(_cons `cp_drop' *.`r_var' *.civs *.N *.regionid)
+				drop(_cons `cp_drop' *.`r_var' *.civs *.N *.regionid *.`time'no)
 			graph export ../output/es_`type'_`time'_`r_var'_`outcome'.pdf, replace
 		}
 	restore
@@ -183,7 +182,7 @@ program              create_sample
 	* Time variable
 	gen post_Week   = Week  - Week_hivm
 	gen post_Month  = Month - Month_hivm
-	gen post_static = (date_pb > date_hivm2) if date_pb!=date_hivm2 & inrange(post_Week,-24,16)
+	gen post_static = (date_pb > date_hivm2) if date_pb!=date_hivm2 & inrange(post_Week,-12,12)
 	* Subsample
 	keep if gender==1 & pregnant==0
 	assert !mi(id_b) & !mi(id_m) & ! mi(post_Week)
