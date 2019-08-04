@@ -7,7 +7,7 @@ set more off
 program main
 	qui do ..\globals.do
 	*enrolled
-	foreach filename in  "hiv_fam" "hiv_did_fam" {
+	foreach filename in  "hiv_fam" "hiv_did_fam" "hiv_es_p_fam" {
 		clean_families, filename(`filename')
 	}
 	clean_confirmations	
@@ -46,23 +46,37 @@ program main
 	label values child child
 	save ..\temp\hiv_tests.dta, replace
 	
-	use "..\..\..\derived\clean\output\hiv_did.dta", clear
+	clean_es_tables, file_name("hiv_did")
+	clean_es_tables, file_name("hiv_es_p")
+end
+
+capture program drop clean_es_tables
+program              clean_es_tables
+syntax, file_name(str)
+	use "..\..\..\derived\clean\output\\`file_name'.dta", clear
 	clean_pbon_time	
 	create_demo_vars
-	merge m:1 id_b id_m using ..\temp\hiv_did_enr.dta   , nogen keep(3)
-	merge m:1 id_b id_m using ..\temp\hiv_did_fam.dta, nogen keep(3)
-	bys id_m id_b: egen date_hivm = min(date_hiv) if date_hiv>=td(${hiv5_Day_R})
+	local file_name = "hiv_es_p"
+	merge m:1 id_b id_m using ..\temp\\`file_name'_enr.dta, nogen keep(3)
+	merge m:1 id_b id_m using ..\temp\\`file_name'_fam.dta, nogen // keep(3)
+	if "`file_name'" == "hiv_did" {
+		bys id_m id_b: egen date_hivm = min(date_hiv) if date_hiv>=td(${hiv5_Day_R})
+	}
+	else if "`file_name'" == "hiv_es_p" {
+		bys id_m id_b: egen date_hivm = min(date_hiv) if date_hiv>=mdy(month(td(${hiv5_Day_R})),day(td(${hiv5_Day_R})),year(td(${hiv5_Day_R}))-1)
+	}
 	bys id_m id_b (date_hivm):  replace date_hivm = date_hivm[1] if mi(date_hivm)
 	format %td date_hivm
 	bys id_m id_b : egen n_hiv_tests = max(n_hiv_test)
+	drop if  mi(date_hivm) & control==0
 	assert (!mi(date_hivm) & control==0) | (mi(date_hivm) & control==1)
 	* Code groups
 	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
 	* Outcomes
-	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" "diagther" "surgery" "drcancer" "imaging" {
+	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" "diagther" "surgery" "drcancer" "imaging" "psychias" {
 		gen y_`x' = (code_type == "`x'")
 	}
-	save ..\temp\hiv_did.dta, replace
+	save ..\temp\\`file_name'.dta, replace
 end
 
 capture program drop clean_pbon_time
@@ -235,7 +249,7 @@ syntax, filename(string)
 	gen partner = 1 if civs==2
 	* Prepare to merge
 	
-	if "`filename'" == "hiv_did_fam" {
+	if inlist("`filename'","hiv_did_fam","hiv_es_p_fam") {
 		keep if control!=9
 		preserve
 			keep id_m id_b isapre
@@ -246,7 +260,8 @@ syntax, filename(string)
 			save `isapre_fam'
 		restore
 		preserve
-			use id_m id_b isapre using "..\..\..\derived\clean\output\hiv_did.dta", clear
+			local filen = regexr("`filename'",substr("`filename'",-4,.),"")
+			use id_m id_b isapre using "..\..\..\derived\clean\output\\`filen'.dta", clear
 			duplicates drop
 			bys id_m id_b: egen ni_pb = count(isapre)
 			merge 1:1 id_m id_b isapre using `isapre_fam'
@@ -327,6 +342,16 @@ program              enrolled
 	duplicates drop
 	gen enr = 1
 	save ..\temp\hiv_did_enr.dta, replace
+	
+	use "..\..\..\derived\clean\output\hiv_es_p_enr.dta", clear
+	drop index
+	duplicates drop
+	bys id_m id_b: egen n_m = count(month)
+	drop if n_m<24
+	keep id_m id_b 
+	duplicates drop
+	gen enr = 1
+	save ..\temp\hiv_es_p_enr.dta, replace
 	
 	use "..\..\..\derived\clean\output\hiv_enr.dta", clear
 	drop index
