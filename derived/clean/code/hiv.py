@@ -142,7 +142,7 @@ def main():
     hiv_did.reset_index(drop=True,inplace=True)
     hiv_did.info(memory_usage='deep')
     hiv_did.to_stata('../output/hiv_did.dta')
-        
+
     print('\n-- Families of did sample')
     did_fam0 = hiv_did[['id_m']].drop_duplicates()
     did_ids2 = hiv_did[['id_m','id_b','control']].drop_duplicates()
@@ -167,7 +167,7 @@ def main():
     del did_fam
 
     print('\n-- Event study - placebo')
-    hiv_p = df.loc[df['month'].between(201707,201709),['id_m','id_b','N','m']]
+    hiv_p = df.loc[df['month'].between(201607,201609),['id_m','id_b','N','m']]
     hiv_p['control'] = 0
     hiv_es_p = pd.merge(hiv_p, dfp.loc[dfp['month'].between(201601,201712)], how='left', on=['id_m','id_b'])
     del hiv_p
@@ -200,7 +200,7 @@ def main():
     es_p_fam.reset_index(drop=True,inplace=True)
     es_p_fam.info(memory_usage='deep')
     es_p_fam.loc[es_p_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_es_p_enr.dta')
-    es_p_fam.loc[es_p_fam['month']==201708].to_stata('../output/hiv_es_p_fam.dta')
+    es_p_fam.loc[es_p_fam['month']==201608].to_stata('../output/hiv_es_p_fam.dta')
     del es_p_fam
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
