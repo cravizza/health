@@ -165,6 +165,43 @@ def main():
     did_fam.loc[did_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_did_enr.dta')
     did_fam.loc[did_fam['month']==201708].to_stata('../output/hiv_did_fam.dta')
     del did_fam
+
+    print('\n-- Event study - placebo')
+    hiv_p = df.loc[df['month'].between(201707,201709),['id_m','id_b','N','m']]
+    hiv_p['control'] = 0
+    hiv_es_p = pd.merge(hiv_p, dfp.loc[dfp['month'].between(201601,201712)], how='left', on=['id_m','id_b'])
+    del hiv_p
+    hiv_es_p = hiv_es_p.loc[hiv_es_p['isapre'].notnull()] 
+    for c in ['code','code2','code7']:
+        hiv_es_p[c] = hiv_es_p[c].astype('string')
+    for c in ['age','isapre','pregnant']:
+        hiv_es_p[c] = hiv_es_p[c].astype('int8')
+    hiv_es_p.reset_index(drop=True,inplace=True)
+    hiv_es_p.info(memory_usage='deep')
+    hiv_es_p.to_stata('../output/hiv_es_p.dta')
+        
+    print('\n-- Families of es-placebo sample')
+    es_p_fam0 = hiv_es_p[['id_m']].drop_duplicates()
+    es_ids3 = hiv_es_p[['id_m','id_b','control']].drop_duplicates()
+    del hiv_es_p
+    interm_p  = pd.merge(es_p_fam0, dfb.loc[dfb['month'].between(201601,201712)], how='left', on=['id_m'])
+    del es_p_fam0
+    interm_p  = interm_p.loc[interm_p['isapre'].notnull()] 
+    es_p_fam = pd.merge(interm_p, es_ids3, how='left', on=['id_m','id_b'])
+    del interm_p
+    del es_ids3
+    es_p_fam['control'].fillna(9, inplace=True)
+    for c in ['control','isapre']:
+        es_p_fam[c] = es_p_fam[c].astype('int8')
+    for c in ['id_b','dob','dod_m','month']:
+        es_p_fam[c] = es_p_fam[c].astype('int32')
+    for c in ['region','munici']:
+        es_p_fam[c] = es_p_fam[c].astype('string')
+    es_p_fam.reset_index(drop=True,inplace=True)
+    es_p_fam.info(memory_usage='deep')
+    es_p_fam.loc[es_p_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_es_p_enr.dta')
+    es_p_fam.loc[es_p_fam['month']==201708].to_stata('../output/hiv_es_p_fam.dta')
+    del es_p_fam
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
