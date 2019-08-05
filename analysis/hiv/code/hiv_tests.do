@@ -14,7 +14,9 @@ program main
 	incidence_plot, time(Month)
 	
 	use ..\temp\hiv_tests.dta, clear
-	es_2017, time(Week) r_var(male) window(15)	
+	es_2017, time(Week) r_var(male) window(15)
+	es_2017, time(Week) r_var(female) window(15)
+	es_2017, time(Week) r_var(all) window(15)
 	
 	keep if enr==1
 	trend_year
@@ -22,6 +24,8 @@ program main
 	foreach byvar in test_n age_male married copay_gr proreg_13 {
 		trends_by_var, time(Week) r_var(male)  by_var(`byvar')
 	}
+	trends_by_var, time(Week) r_var(female) by_var(age_female)
+	trends_by_var, time(Week) r_var(all) by_var(age_all)
 	
 	use ..\temp\hiv_pbon.dta, clear
 	keep if male==1 & enr==1

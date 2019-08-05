@@ -119,6 +119,7 @@ program              create_demo_vars
 	local   end_list = "24 30 40 50"
 	gen age_male =.
 	gen age_female =.
+	gen age_all =.
 	local N = `: word count `start_list''
 	local age_groups = ""
 	forv x = 1(1)`N' {
@@ -127,11 +128,14 @@ program              create_demo_vars
 		local age_groups = `"`age_groups'"' + `" `x' "`s1'_`e1'" "'
 		replace   age_male = `x' if gender==1 & inrange(age,`s1',`e1')
 		replace age_female = `x' if gender==0 & inrange(age,`s1',`e1')
+		replace age_all    = `x' if             inrange(age,`s1',`e1')
 	}
 	capture label drop age_groups
 	label define age_groups `age_groups'
 	label values age_male    age_groups
-	label values age_female  age_groups	
+	label values age_female  age_groups
+	label values age_all     age_groups
+	gen all = !mi(age_all)
 	local start_a_list = "15 20 25 30 35 40 45 50"
 	local   end_a_list = "19 24 29 34 39 44 59 60"
 	gen age_a_male =.
