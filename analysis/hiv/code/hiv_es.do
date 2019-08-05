@@ -6,31 +6,38 @@ set more off
 
 program main
 	qui do ..\globals.do
-	create_sample
+	create_sample, file_name("hiv_did")
+	create_sample, file_name("hiv_es_p")
 	*keep if N<4 & m>201415
 	
 	global controls = " civs N municiid regionid "
-	use ..\temp\hiv_did_dates.dta, clear
-	drop if date_hivm2>=td(10Sep2017)
 	local timew = "Week"
 	local timem = "Month"
 	local tmax  = "max"
 	local tsum  = "sum"
-	local rvar  = "age_a_male"
+	local rvar  = "age_male"
 	local yvars = "y_docvisit      y_spevisit          y_prevscre        y_diagther " ///
 	            + "y_surgery       y_hospital          y_labblood        y_laburine   y_imaging"
 	local ylabs = `""Doctor visit" "Specialist visit"  "Preventive care" "Diagnosis/therapy" "' ///
 	            + `""Surgery"      "Hospitalization"   "Blood test"      "Urine test" "Imaging""'
 	
 	set graphics off
-	es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tmax')
-	es_dynamic, time(`timem') r_var(`rvar') y_vars(`yvars') type(`tmax')
-	es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tsum')
-	es_dynamic, time(`timem') r_var(`rvar') y_vars(`yvars') type(`tsum')
+	foreach rvar in "age_male" "age_female" {
+		use ..\temp\hiv_did_dates.dta, clear
+		drop if date_hivm2>=td(10Sep2017)
+		es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tmax')
+		es_dynamic, time(`timem') r_var(`rvar') y_vars(`yvars') type(`tmax')
+		es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tsum')
+		es_dynamic, time(`timem') r_var(`rvar') y_vars(`yvars') type(`tsum')
+		es_static, r_var(`rvar') y_vars(`yvars') type(`tmax') y_labs(`"`ylabs'"')
+		es_static, r_var(`rvar') y_vars(`yvars') type(`tsum') y_labs(`"`ylabs'"')
+		
+		use ..\temp\hiv_es_p_dates.dta, clear
+		drop if date_hivm2_placebo>=td(10Sep2016)
+		es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tmax') placebo("yes")
+		es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tsum') placebo("yes")
+	}
 	set graphics on
-	
-	es_static, r_var(`rvar') y_vars(`yvars') type(`tmax') y_labs(`"`ylabs'"')
-	es_static, r_var(`rvar') y_vars(`yvars') type(`tsum') y_labs(`"`ylabs'"')
 end
 
 capture program drop es_static
@@ -101,13 +108,20 @@ end
 
 capture program drop es_dynamic
 program              es_dynamic	
-syntax, time(varname) r_var(varname) y_vars(varlist) type(str)
+syntax, time(varname) r_var(varname) y_vars(varlist) type(str) [placebo(str)]
 	preserve
-		drop if date_hivm == date_pb // exclude any servs on the day of the test
+		if inlist("`placebo'","no","") {
+			local plac = ""
+		}
+		else if "`placebo'" == "yes" {
+			local plac = "_placebo"
+			drop if date_pb>=td(01Jul2017)
+		}
+		drop if date_hivm2`plac' == date_pb // exclude any servs on the day of the test
 		drop if mi(`r_var')
 		sort id_b id_m date_pb `r_var'
 		collapse (`type') `y_vars' (mean) control (firstnm) `r_var' ${controls} Week ///
-			, by(id_m id_b post_`time')
+			, by(id_m id_b post_`time'`plac')
 		assert !mi(id_b) & !mi(id_m) & ! mi(post)
 		* Create a balanced panel (w/all controls) and fill w/zero if no service
 		egen id = group(id_m id_b)
@@ -119,6 +133,7 @@ syntax, time(varname) r_var(varname) y_vars(varlist) type(str)
 			bys id: egen _temp = max(`x')
 			replace `x' = _temp if `x'==-99
 			drop _temp
+			replace `x' = 0 if `x'==-99
 		}
 		foreach x in `y_vars' {
 			replace `x' = 0 if mi(`x')
@@ -166,31 +181,40 @@ syntax, time(varname) r_var(varname) y_vars(varlist) type(str)
 			reg `outcome' i.i_post i.`r_var' i.civs i.N i.region i.`time'no
 			coefplot, `coefplot_opts' xtitle("`time_label'")  `cp_xlab' ///
 				drop(_cons `cp_drop' *.`r_var' *.civs *.N *.regionid *.`time'no)
-			graph export ../output/es_`type'_`time'_`r_var'_`outcome'.pdf, replace
+			graph export ../output/es_`type'_`time'_`r_var'_`outcome'`plac'.pdf, replace
 		}
 	restore
 end
 
 capture program drop create_sample
 program              create_sample	
-	use ..\temp\hiv_did.dta, clear
-	rename date_hivm date_hivm2
-	gen Week_hivm = wofd(date_hivm2)
-	format %tw Week_hivm
-	gen Month_hivm = mofd(date_hivm2)
-	format %tm Month_hivm
+syntax, file_name(str)
+	use ..\temp\\`file_name'.dta, clear
+	if "`file_name'" == "hiv_did" {
+		local plac = ""
+	}
+	else if "`file_name'" == "hiv_es_p" {
+		local plac = "_placebo"
+		drop if date_pb>=td(01Jul2017)
+	}
+	rename date_hivm date_hivm2`plac'
+	format %td date_hivm2`plac'
+	gen Week_hivm`plac' = wofd(date_hivm2`plac')
+	format %tw Week_hivm`plac'
+	gen Month_hivm`plac' = mofd(date_hivm2`plac')
+	format %tm Month_hivm`plac'
 	* Time variable
-	gen post_Week   = Week  - Week_hivm
-	gen post_Month  = Month - Month_hivm
-	gen post_static = (date_pb > date_hivm2) if date_pb!=date_hivm2 & inrange(post_Week,-12,12)
+	gen post_Week`plac'  = Week  - Week_hivm`plac'
+	gen post_Month`plac' = Month - Month_hivm`plac'
+	gen post_static`plac' = (date_pb > date_hivm2`plac') if date_pb!=date_hivm2`plac' & inrange(post_Week`plac',-12,12)
 	* Subsample
-	keep if gender==1 & pregnant==0
-	assert !mi(id_b) & !mi(id_m) & ! mi(post_Week)
+	keep if pregnant==0
+	assert !mi(id_b) & !mi(id_m) & ! mi(post_Week`plac')
 	encode region, g(regionid)
 	encode munici, g(municiid)
 	bys id_m id_b date_pb: egen n_pb = count(isapre)
 	replace civs=0 if inlist(civs,.,3,4)
-	save ..\temp\hiv_did_dates.dta, replace
+	save ..\temp\\`file_name'_dates.dta, replace
 end
 
 main
