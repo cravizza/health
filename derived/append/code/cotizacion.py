@@ -59,6 +59,7 @@ def clean_single_df(df):
     df['e_typ'].replace(to_replace=r'(empleador)'                          ,value='salaried' ,regex=True,inplace=True)
     df['e_typ'].replace(to_replace=r'(trabajador independiente|voluntario)',value='indep_vol',regex=True,inplace=True)
     df['e_typ'].replace(to_replace=r'(.*pension.*)'                        ,value='other'    ,regex=True,inplace=True)
+    df['e_typ'].replace(to_replace=r'(sin especificar)'                    ,value='other'    ,regex=True,inplace=True)
     # Clean regions
     df['e_reg'].replace(to_replace=r'(.*metropol.*)'                                         ,value='13',regex=True,inplace=True)   
     df['e_reg'].replace(to_replace=r'(.*arica.*|.*parina.*)'                                 ,value='15',regex=True,inplace=True)

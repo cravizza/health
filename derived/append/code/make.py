@@ -9,6 +9,7 @@ def main():
 	os.system('python cotizacion.py')
 	os.system('python hdischarge.py')
 	os.system('python caec.py')
+	os.system('python contracts.py')
 
 	# Logging
 	filenames = [os.path.join(path, f) for path, sd, files in os.walk('../output') for f in files if 'log_' in f]
