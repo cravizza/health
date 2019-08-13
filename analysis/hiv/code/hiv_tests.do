@@ -14,6 +14,8 @@ program main
 	incidence_plot, time(Month)
 	
 	use ..\temp\hiv_tests.dta, clear
+	replace married=0 if child==1
+	es_2017_table, time(Week) window(15)
 	es_2017, time(Week) r_var(male) window(15)
 	es_2017, time(Week) r_var(female) window(15)
 	es_2017, time(Week) r_var(all) window(15)
@@ -40,6 +42,55 @@ program main
 	set graphics on
 end
 
+capture program drop es_2017_table
+program              es_2017_table
+syntax, time(varname) window(int)
+	foreach r_var in all male female {
+		preserve
+			keep if enr==1
+			collapse (count) tests=age (first) Year if `r_var'==1, by(`time')
+			gen `time'no = week(dofw(`time'))
+			gen t = cond(inrange(Week,tw(${hiv5_`time'_L})-`window',tw(${hiv5_`time'_L})+`window'),`time' - tw(${hiv5_`time'_L}) + `window' + 1,0)
+			gen b = Week - tw(2012w1)
+			* Create table with trend
+			reg tests b i.t i.`time'no i.Year
+			foreach v in "_cons" "b" {
+				local `r_var'_`v'_b: di %5.2f _b[`v']
+				local `r_var'_`v'_p: di %5.3f (2*ttail(e(df_r), abs(_b[`v']/_se[`v'])))
+				local `r_var'_`v'_p = "(``r_var'_`v'_p')"
+			}
+			local T = 2*`window' + 1
+			forval t = 1/`T' {
+				local `r_var'_t`t'_b: di %5.2f _b[`t'.t]
+				local `r_var'_t`t'_p: di %5.3f (2*ttail(e(df_r), abs(_b[`t'.t]/_se[`t'.t])))
+				local `r_var'_t`t'_p = "(``r_var'_t`t'_p')"
+			}
+			local vars = "_cons b "
+			forval t = 1/`T' {
+				local c = `t' - 16
+				local vars = "`vars'" + " t`t'"
+				qui sum `time' if t==`t'
+				local lab_t`t' : di %tw `r(mean)' 
+				local lab_t`t' = char(36) + " c_{`c'} " + char(36) + ": `lab_t`t''"
+			}
+		restore
+	}
+	local lab__cons = "Constant"
+	local lab_b     = "Trend"
+	file open myfile using "..\output\es5_table_`window'_`time'.tex", write replace
+	file write myfile "\begin{threeparttable}" ///
+					_n "\begin{tabular}{@{}r|rr|rr|rr@{}} \hline\hline"  ///
+					_n " & \multicolumn{2}{c|}{(1) All} & \multicolumn{2}{c|}{(2) Men} & " ///
+					   " \multicolumn{2}{c}{(3) Women} \\ " ///
+					_n " & Coeff. & p-value  & Coeff. & p-value & Coeff. & p-value \\ \hline"
+	foreach v in `vars' {
+		file write myfile _n " `lab_`v'' & `all_`v'_b'  & `all_`v'_p' & " ///
+			"`male_`v'_b'  & `male_`v'_p'  & `female_`v'_b'  & `female_`v'_p' \\ "
+	}
+	file write myfile _n "\hline\hline" _n "\end{tabular}"
+	file close myfile
+end
+
 capture program drop es_2017
 program es_2017
 syntax, time(varname) r_var(varname) window(int)
@@ -60,11 +111,10 @@ syntax, time(varname) r_var(varname) window(int)
 		gen b = Week - tw(2012w1)
 
 		reg tests b i.t i.`time'no i.Year
-		local window =15
-		local N = 2*`window' + 1
-		local modN = floor(`N'/4) // because I want labs only on five dates
-		forval i = 1/`N' {
-			if mod(`i',`modN')==1 {
+		local T = 2*`window' + 1
+		local modT = floor(`T'/4) // because I want labs only on five dates
+		forval i = 1/`T' {
+			if mod(`i',`modT')==1 {
 				qui sum Week if t==`i'
 				local ti : di %tw `r(mean)'
 				local labs = `"`labs'"' + `" `i' "`ti'" "'
@@ -79,30 +129,27 @@ syntax, time(varname) r_var(varname) window(int)
 			mc(midgreen) xtitle("`time_label'") ///
 			xlabel(`labs') xline(`xl', lc(black) lp(dash))	 xline(`x2' `x3', lc(gs8) lp(shortdash))
 		graph export ../output/es5_`r_var'_`window'_`time'.pdf, replace
-		* Create table with and without trend
-		local FE1 = " b"
-		forval x=1/1 { 
-			reg tests `FE`x'' i.t i.`time'no i.Year
-			foreach v in "_cons" `FE`x'' { //T I
-				local `v'_`x'b: di %5.2f _b[`v']
-				local `v'_`x'p: di %5.3f (2*ttail(e(df_r), abs(_b[`v']/_se[`v'])))
-				local `v'_`x'p = "(``v'_`x'p')"
-			}
-			forval yy = 1/`N' {
-				local t`yy'_`x'b: di %5.2f _b[`yy'.t]
-				local t`yy'_`x'p: di %5.3f (2*ttail(e(df_r), abs(_b[`yy'.t]/_se[`yy'.t])))
-				local t`yy'_`x'p = "(`t`yy'_`x'p')"
-			}			
+		* Create table with trend 
+		reg tests b i.t i.`time'no i.Year
+		foreach v in "_cons" "b" {
+			local `v'_b: di %5.2f _b[`v']
+			local `v'_p: di %5.3f (2*ttail(e(df_r), abs(_b[`v']/_se[`v'])))
+			local `v'_p = "(``v'_p')"
 		}
+		forval t = 1/`T' {
+			local t`t'_b: di %5.2f _b[`t'.t]
+			local t`t'_p: di %5.3f (2*ttail(e(df_r), abs(_b[`t'.t]/_se[`t'.t])))
+			local t`t'_p = "(`t`t'_p')"
+		}			
 		local vars = "_cons b "
 		local lab__cons = "Constant"
 		local lab_b     = "Trend"
-		forval yy = 1/31 {
-			local c = `yy' - 16
-			local vars = "`vars'" + " t`yy'"
-			qui sum `time' if t==`yy'
-			local lab_t`yy' : di %tw `r(mean)' 
-			local lab_t`yy' = char(36) + " c_{`c'} " + char(36) + ": `lab_t`yy''"
+		forval t = 1/`T' {
+			local c = `t' - 16
+			local vars = "`vars'" + " t`t'"
+			qui sum `time' if t==`t'
+			local lab_t`t' : di %tw `r(mean)' 
+			local lab_t`t' = char(36) + " c_{`c'} " + char(36) + ": `lab_t`t''"
 		}
 		file open myfile using "..\output\es5_`r_var'_`window'_`time'.tex", write replace
 		file write myfile "\begin{threeparttable}" ///
@@ -110,7 +157,7 @@ syntax, time(varname) r_var(varname) window(int)
 						_n " & \multicolumn{2}{c}{(1)} \\ " ///
 						_n " & Coeff. & p-value \\ \hline"
 		foreach v in `vars' {
-			file write myfile _n " `lab_`v'' & ``v'_1b'  & ``v'_1p' \\ "
+			file write myfile _n " `lab_`v'' & ``v'_b'  & ``v'_p' \\ "
 		}
 		file write myfile _n "\hline\hline" _n "\end{tabular}"
 		file close myfile		
