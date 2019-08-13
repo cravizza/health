@@ -104,6 +104,10 @@ end
 
 capture program drop create_demo_vars
 program              create_demo_vars
+	gen birth = (regexm(code7,"^20040*") | inlist(code7,"0101007","2501009"))
+	bys id_m id_b: egen birthM = max(birth)
+	replace pregnant = 1 if birthM==1
+	drop birth*
 	* Gender
 	keep if gender!=2
 	lab drop gender
@@ -127,9 +131,9 @@ program              create_demo_vars
 		local s1: word `x' of `start_list'
 		local e1: word `x' of   `end_list'
 		local age_groups = `"`age_groups'"' + `" `x' "`s1'_`e1'" "'
-		replace   age_male = `x' if gender==1 & inrange(age,`s1',`e1')
-		replace age_female = `x' if gender==0 & inrange(age,`s1',`e1')
-		replace age_all    = `x' if             inrange(age,`s1',`e1')
+		replace age_male   = `x' if inrange(age,`s1',`e1') & male==1
+		replace age_female = `x' if inrange(age,`s1',`e1') & female==1
+		replace age_all    = `x' if inrange(age,`s1',`e1') & (male==1|female==1)
 	}
 	capture label drop age_groups
 	label define age_groups `age_groups'
