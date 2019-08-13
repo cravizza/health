@@ -26,9 +26,10 @@ program main
 	* Code groups
 	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
 	* Outcomes
-	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" "diagther" "surgery" "drcancer" "imaging" {
+	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" "diagther" "surgery" "drcancer" "imaging" "psychias" {
 		gen y_`x' = (code_type == "`x'")	
 	}
+	gen y_examslab = (code_group=="examslab")
 	save ..\temp\hiv_pbon.dta, replace
 	
 	keep if i_hiv==1
@@ -56,7 +57,6 @@ syntax, file_name(str)
 	use "..\..\..\derived\clean\output\\`file_name'.dta", clear
 	clean_pbon_time	
 	create_demo_vars
-	local file_name = "hiv_es_p"
 	merge m:1 id_b id_m using ..\temp\\`file_name'_enr.dta, nogen keep(3)
 	merge m:1 id_b id_m using ..\temp\\`file_name'_fam.dta, nogen // keep(3)
 	if "`file_name'" == "hiv_did" {
@@ -76,6 +76,7 @@ syntax, file_name(str)
 	foreach x in "docvisit" "spevisit" "hospital" "prevscre" "labblood" "laburine" "diagther" "surgery" "drcancer" "imaging" "psychias" {
 		gen y_`x' = (code_type == "`x'")
 	}
+	gen y_examslab = (code_group=="examslab")
 	save ..\temp\\`file_name'.dta, replace
 end
 

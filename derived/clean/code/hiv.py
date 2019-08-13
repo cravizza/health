@@ -169,7 +169,7 @@ def main():
     print('\n-- Event study - placebo')
     hiv_p = df.loc[df['month'].between(201607,201609),['id_m','id_b','N','m']]
     hiv_p['control'] = 0
-    hiv_es_p = pd.merge(hiv_p, dfp.loc[dfp['month'].between(201601,201712)], how='left', on=['id_m','id_b'])
+    hiv_es_p = pd.merge(hiv_p, dfp.loc[dfp['month'].between(201501,201612)], how='left', on=['id_m','id_b'])
     del hiv_p
     hiv_es_p = hiv_es_p.loc[hiv_es_p['isapre'].notnull()] 
     for c in ['code','code2','code7']:
@@ -184,7 +184,7 @@ def main():
     es_p_fam0 = hiv_es_p[['id_m']].drop_duplicates()
     es_ids3 = hiv_es_p[['id_m','id_b','control']].drop_duplicates()
     del hiv_es_p
-    interm_p  = pd.merge(es_p_fam0, dfb.loc[dfb['month'].between(201601,201712)], how='left', on=['id_m'])
+    interm_p  = pd.merge(es_p_fam0, dfb.loc[dfb['month'].between(201501,201612)], how='left', on=['id_m'])
     del es_p_fam0
     interm_p  = interm_p.loc[interm_p['isapre'].notnull()] 
     es_p_fam = pd.merge(interm_p, es_ids3, how='left', on=['id_m','id_b'])

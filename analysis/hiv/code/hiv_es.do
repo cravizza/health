@@ -10,19 +10,18 @@ program main
 	create_sample, file_name("hiv_es_p")
 	*keep if N<4 & m>201415
 	
-	global controls = " civs N municiid regionid "
+	global controls = " civs N regionid "
 	local timew = "Week"
 	local timem = "Month"
 	local tmax  = "max"
 	local tsum  = "sum"
-	local rvar  = "age_male"
 	local yvars = "y_docvisit      y_spevisit          y_prevscre        y_diagther " ///
-	            + "y_surgery       y_hospital          y_labblood        y_laburine   y_imaging"
+	            + "y_surgery       y_hospital          y_examslab        y_psychias"
 	local ylabs = `""Doctor visit" "Specialist visit"  "Preventive care" "Diagnosis/therapy" "' ///
-	            + `""Surgery"      "Hospitalization"   "Blood test"      "Urine test" "Imaging""'
+	            + `""Surgery"      "Hospitalization"   "Lab tests"       "Mental health""'
 	
 	set graphics off
-	foreach rvar in "age_male" "age_female" {
+	foreach rvar in "age_all" "age_male" "age_female" {
 		use ..\temp\hiv_did_dates.dta, clear
 		drop if date_hivm2>=td(10Sep2017)
 		es_dynamic, time(`timew') r_var(`rvar') y_vars(`yvars') type(`tmax')
@@ -44,10 +43,16 @@ capture program drop es_static
 program              es_static	
 syntax, r_var(varname) y_vars(varlist) type(str) y_labs(str)
 	preserve
+		if substr("`r_var'",-3,1) == "all" {
+			local controls = "${controls}" + " municiid" + " gender"
+		}
+		else {
+			local controls = "${controls}" + " municiid"
+		}
 		drop if mi(post_static) // exclude any services on the day of the test
 		drop if mi(`r_var')
 		sort id_b id_m date_pb `r_var'
-		collapse (`type') `y_vars' (mean) control (firstnm) `r_var' ${controls} date_hivm2 ///
+		collapse (`type') `y_vars' (mean) control (firstnm) `r_var' `controls' date_hivm2 ///
 			, by(id_m id_b post_static)
 		assert !mi(id_b) & !mi(id_m) & ! mi(post)
 		* Create a balanced panel (w/all controls) and fill w/zero if no service
@@ -60,6 +65,7 @@ syntax, r_var(varname) y_vars(varlist) type(str) y_labs(str)
 			bys id: egen _temp = max(`x')
 			replace `x' = _temp if `x'==-99
 			drop _temp
+			replace `x' = 0 if `x'==-99
 		}
 		foreach x in `y_vars' {
 			replace `x' = 0 if mi(`x')
@@ -115,12 +121,19 @@ syntax, time(varname) r_var(varname) y_vars(varlist) type(str) [placebo(str)]
 		}
 		else if "`placebo'" == "yes" {
 			local plac = "_placebo"
-			drop if date_pb>=td(01Jul2017)
+			//drop if date_pb>=td(01Jul2017)
+		}
+		if substr("`r_var'",-3,1) == "all" {
+			local controls = "${controls}" + " gender"
+		}
+		else {
+			local controls = "${controls}"
+			//drop if date_pb>=td(01Jul2017)
 		}
 		drop if date_hivm2`plac' == date_pb // exclude any servs on the day of the test
 		drop if mi(`r_var')
 		sort id_b id_m date_pb `r_var'
-		collapse (`type') `y_vars' (mean) control (firstnm) `r_var' ${controls} Week ///
+		collapse (`type') `y_vars' (mean) control (firstnm) `r_var' `controls' Week ///
 			, by(id_m id_b post_`time'`plac')
 		assert !mi(id_b) & !mi(id_m) & ! mi(post)
 		* Create a balanced panel (w/all controls) and fill w/zero if no service
@@ -128,7 +141,7 @@ syntax, time(varname) r_var(varname) y_vars(varlist) type(str) [placebo(str)]
 		qui xtset id post
 		tsfill, full
 		xtset id post
-		foreach x in control `r_var' ${controls} {
+		foreach x in control `r_var' `controls' {
 			replace `x' = -99 if mi(`x')
 			bys id: egen _temp = max(`x')
 			replace `x' = _temp if `x'==-99
@@ -173,12 +186,17 @@ syntax, time(varname) r_var(varname) y_vars(varlist) type(str) [placebo(str)]
 			local cp_xlab = `"xlab(`cp_labs')"'
 		}
 		* Run regressions and create plots
+		local words: word count `controls'
+		forval w = 1/`words' {
+			local y: word `w' of `controls'
+			local i_controls = "`i_controls'" + " i." + "`y'"
+		}
 		qui sum i_post if post==0
 		local x0 = `r(mean)' - 0.5 - 1 // -1 since we drop first coefficient
 		local coefplot_opts = " vertical baselevels ${wb} yli(0, lc(gs12)) " ///
 		       + " xline(`x0', lc(black) lp(dot)) mc(midgreen) ciopts(lc(midgreen))"
 		foreach outcome in `y_vars' {
-			reg `outcome' i.i_post i.`r_var' i.civs i.N i.region i.`time'no
+			reg `outcome' i.i_post i.`r_var' `i_controls' i.`time'no
 			coefplot, `coefplot_opts' xtitle("`time_label'")  `cp_xlab' ///
 				drop(_cons `cp_drop' *.`r_var' *.civs *.N *.regionid *.`time'no)
 			graph export ../output/es_`type'_`time'_`r_var'_`outcome'`plac'.pdf, replace
@@ -195,7 +213,7 @@ syntax, file_name(str)
 	}
 	else if "`file_name'" == "hiv_es_p" {
 		local plac = "_placebo"
-		drop if date_pb>=td(01Jul2017)
+		//drop if date_pb>=td(01Jul2017)
 	}
 	rename date_hivm date_hivm2`plac'
 	format %td date_hivm2`plac'
