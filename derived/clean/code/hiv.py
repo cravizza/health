@@ -18,16 +18,14 @@ def main():
     print('-- Executing: ' + str(os.getcwd())[38:] + '/hiv.py')
     print('-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-	# Load benef
     start0 = time.time()
     df1 = pd.read_pickle(pDerived + 'beneficiaries1')
     df2 = pd.read_pickle(pDerived + 'beneficiaries2')
     dfb = pd.concat([df1, df2], axis=0, ignore_index=True)
     del df1
     del df2
-    print('\n-- Time elapsed load and concat: ' + str(int(time.time() - start0)) + ' sec.')
+    print('\n-- Beneficiaries, time elapsed load and concat: ' + str(int(time.time() - start0)) + ' sec.')
 
-    # Load pbon
     start1 = time.time()
     df1 = pd.read_pickle(pDerived + 'pboni1')
     df2 = pd.read_pickle(pDerived + 'pboni2')
@@ -39,14 +37,8 @@ def main():
     dfp = dfp.loc[dfp['code'].notnull()] 
     dfp.drop(columns=['proid'], inplace=True) # drop to use in Stata
     dfp['code2'] = dfp.code.str.zfill(7).str[0:2] 
-    print('\n-- Time elapsed load and concat: ' + str(int(time.time() - start1)) + ' sec.')    
-    
-    # Load GES
-    start2 = time.time()
-    dfg = pd.read_pickle(pDerived + 'hiv_ges')
-    dfg = dfg.loc[(dfg['month']>=201201)]
-    print('\n-- Time elapsed load: ' + str(int(time.time() - start2)) + ' sec.')
-    
+    print('\n-- Pbon, time elapsed load and concat: ' + str(int(time.time() - start1)) + ' sec.')    
+        
     print('\n-- Create sample of 2017 beneficiaries')
     ben_2017_pre = dfb.loc[(dfb['gender']=='masculino')&(dfb['month'].between(201701, 201712)),['id_m','id_b','munici']].drop_duplicates()
     ben_2017_pre.drop(columns=['id_m'], inplace=True)
@@ -72,7 +64,6 @@ def main():
     hiv_fam0 = hiv_tests[['month','id_m']].drop_duplicates()
     hiv_ids  = hiv_tests[['month','id_m','id_b']].drop_duplicates()
     hiv_ids2 = hiv_tests[['month','id_m','id_b','hiv']].drop_duplicates()
-    ges_ids  =       dfg[['month','id_m','id_b']].drop_duplicates()
     hiv_tests[['id_m','id_b','month']].info()
     
     print('\n-- Families of hiv testers')
@@ -114,18 +105,6 @@ def main():
     hiv_pbon.to_stata('../output/hiv_pbon.dta')
     del hiv_pbon
     
-    print('\n-- Pbon of hiv confirmed')
-    hiv_conf = pd.merge(ges_ids, dfp, how='left', on=['id_m','id_b','month'])
-    hiv_conf = hiv_conf.loc[hiv_conf['isapre'].notnull()] 
-    for c in ['code','code2','code7']:
-        hiv_conf[c] = hiv_conf[c].astype('string')
-    for c in ['age','isapre','pregnant']:
-        hiv_conf[c] = hiv_conf[c].astype('int8')
-    hiv_conf.reset_index(drop=True,inplace=True)
-    hiv_conf.info(memory_usage='deep')
-    hiv_conf.to_stata('../output/hiv_conf.dta')
-    del hiv_conf
-    
     print('\n-- Difference-in-differences')
     hiv_ids['N'] = hiv_ids.groupby(['id_m','id_b'])['month'].transform('count')
     df = hiv_ids.loc[hiv_ids['N']<10].copy()
@@ -165,43 +144,6 @@ def main():
     did_fam.loc[did_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_did_enr.dta')
     did_fam.loc[did_fam['month']==201708].to_stata('../output/hiv_did_fam.dta')
     del did_fam
-
-    print('\n-- Event study - placebo')
-    hiv_p = df.loc[df['month'].between(201607,201609),['id_m','id_b','N','m']]
-    hiv_p['control'] = 0
-    hiv_es_p = pd.merge(hiv_p, dfp.loc[dfp['month'].between(201501,201612)], how='left', on=['id_m','id_b'])
-    del hiv_p
-    hiv_es_p = hiv_es_p.loc[hiv_es_p['isapre'].notnull()] 
-    for c in ['code','code2','code7']:
-        hiv_es_p[c] = hiv_es_p[c].astype('string')
-    for c in ['age','isapre','pregnant']:
-        hiv_es_p[c] = hiv_es_p[c].astype('int8')
-    hiv_es_p.reset_index(drop=True,inplace=True)
-    hiv_es_p.info(memory_usage='deep')
-    hiv_es_p.to_stata('../output/hiv_es_p.dta')
-        
-    print('\n-- Families of es-placebo sample')
-    es_p_fam0 = hiv_es_p[['id_m']].drop_duplicates()
-    es_ids3 = hiv_es_p[['id_m','id_b','control']].drop_duplicates()
-    del hiv_es_p
-    interm_p  = pd.merge(es_p_fam0, dfb.loc[dfb['month'].between(201501,201612)], how='left', on=['id_m'])
-    del es_p_fam0
-    interm_p  = interm_p.loc[interm_p['isapre'].notnull()] 
-    es_p_fam = pd.merge(interm_p, es_ids3, how='left', on=['id_m','id_b'])
-    del interm_p
-    del es_ids3
-    es_p_fam['control'].fillna(9, inplace=True)
-    for c in ['control','isapre']:
-        es_p_fam[c] = es_p_fam[c].astype('int8')
-    for c in ['id_b','dob','dod_m','month']:
-        es_p_fam[c] = es_p_fam[c].astype('int32')
-    for c in ['region','munici']:
-        es_p_fam[c] = es_p_fam[c].astype('string')
-    es_p_fam.reset_index(drop=True,inplace=True)
-    es_p_fam.info(memory_usage='deep')
-    es_p_fam.loc[es_p_fam['control']!=9,['id_b','id_m','month']].to_stata('../output/hiv_es_p_enr.dta')
-    es_p_fam.loc[es_p_fam['month']==201608].to_stata('../output/hiv_es_p_fam.dta')
-    del es_p_fam
     
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
