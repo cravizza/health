@@ -81,7 +81,7 @@ def clean_single_df(df):
     for c in ['typpay','e_typ','e_reg']:
         df[c] = df[c].astype('category')
         df[c].cat.remove_unused_categories(inplace=True)
-    # Fix income
+    # Fix income and paytot
     df.dropna(axis=0,subset=['ti_c','ti'],inplace=True)
     df['ti_c'] = df['ti_c'].astype('float')  # first convert to float before int pd.Int16Dtype()
     df['ti_c'] = df['ti_c'].astype('Int32')
@@ -90,6 +90,13 @@ def clean_single_df(df):
     assert len(df.loc[(df.ti_c!=0)&(df.ti2!=df.ti_c),['ti','ti_c','ti2']])==0  #assert df.loc[df.ti_c!=0,'ti_c'].equals(df.loc[df.ti_c!=0,'ti2'])
     df.drop(columns=['ti','ti_c'], inplace=True)
     df.rename(columns={'ti2':'ti'}, inplace=True)
+    df['paytot_c'] = df['paytot_c'].astype('float')  # first convert to float before int pd.Int16Dtype()
+    df['paytot_c'] = df['paytot_c'].astype('Int32')
+    df['paytot2'] = np.where(df['paytot_c']!=0, df['paytot_c'], df['paytot'])  
+    assert len(df.loc[(df.paytot_c==0)&(df.paytot2!=df.paytot),['paytot','paytot_c','paytot2']])==0    #assert df.loc[df.ti_c==0,'ti'].equals(df.loc[df.ti_c==0,'ti2'])
+    assert len(df.loc[(df.paytot_c!=0)&(df.paytot2!=df.paytot_c),['paytot','paytot_c','paytot2']])==0  #assert df.loc[df.ti_c!=0,'ti_c'].equals(df.loc[df.ti_c!=0,'ti2'])
+    df.drop(columns=['paytot','paytot_c'], inplace=True)
+    df.rename(columns={'paytot2':'paytot'}, inplace=True)
 
     return df
 
@@ -112,6 +119,7 @@ def main():
     
     df_concat['month'] =  df_concat['month'].astype('int32')
     df_concat['ti']    =     df_concat['ti'].astype('int32')
+    df_concat['paytot'] = pd.to_numeric(df_concat['paytot'], downcast='integer')
     for c in ['typpay','e_typ','e_reg','e_name','ti_mon']:
         df_concat[c] = df_concat[c].astype('category')    
     
@@ -123,8 +131,9 @@ def main():
         print('\n' + str(df_concat[c].value_counts(dropna=False)))    
     
     print('\n-- Split dataframe ')
-    df1 = df_concat[0:90000000]
-    df2 = df_concat[90000000:]
+    len0 = int(len(df_concat)/2)
+    df1 = df_concat[0:len0]
+    df2 = df_concat[len0:]
     df3 = pd.concat([df1, df2], axis=0, ignore_index=True) 
     print('-- Slices equal to concat dataframe: ' + str(df_concat.equals(df3)))
     del df3
@@ -133,11 +142,22 @@ def main():
     start01 = time.time()
     df1.to_pickle(pDerived + 'cotiza1')
     print('-- Time elapsed first half:  ' + str(int(time.time() - start01)) + ' sec.')
-    
     start02 = time.time()
     df2.to_pickle(pDerived + 'cotiza2')
     print('-- Time elapsed second half: ' + str(int(time.time() - start02)) + ' sec.')
+    del df1, df2
     
+    print('\n-- Pickle income sample')
+    dfi = df_concat.loc[df_concat.ti>=0,['month','id_m','ti','e_typ','paytot']].drop_duplicates()
+    dfi.reset_index(drop=True,inplace=True)
+    len1 = int(len(dfi)/2)
+    df1 = dfi[0:len1]
+    df2 = dfi[len1:]
+    del dfi
+    df1.to_pickle(pDerived + 'cotiza_income1')
+    df2.to_pickle(pDerived + 'cotiza_income2')
+    del df1, df2
+
     print('\n-- Total time elapsed: ' + str(int((time.time() - start0)/60)) + ' min. / ' + str(int(time.time() - start0)) + ' sec.')
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 

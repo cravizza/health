@@ -3,10 +3,10 @@ Logging: health\derived\append\code
 
 
 -- Executing: health\derived\append\code/beneficiaries.py
--- Timestamp: 2019-08-05 23:31:04
+-- Timestamp: 2019-08-23 20:28:24
 
 -- Begin pool 
--- Time pool.map and concat:  1590 sec.
+-- Time pool.map and concat:  1639 sec.
 
 -- Concat dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -36,44 +36,45 @@ memory usage: 11.2 GB
 -- Drop if id_alt!=0  :  3316274 rows dropped (1.38%)
 -- Drop if rut zero   :  2867918 rows dropped (1.19%)
 -- Drop if dupl. keys :  1160250 rows dropped (0.48%)
--- Total rows dropped : 12321599 rows dropped (5.13%)
--- Time elapsed cleaning : 1602 sec.
+-- Drop if dead :  307707 rows dropped (0.12%)
+-- Total rows dropped : 12629306 rows dropped (5.26%)
+-- Time elapsed cleaning : 1636 sec.
 
 -- Descriptive stats
 
-masculino    123743574
-femenino     103975230
+masculino    123515107
+femenino     103895990
 no info          12315
 Name: gender, dtype: int64
 
-no info       145974330
-casada         44768123
-soltera        35524187
-divorciada       951529
-viuda            512950
+no info       145969212
+casada         44558477
+soltera        35446294
+divorciada       946135
+viuda            503294
 Name: civs_m, dtype: int64
 
-no info       160687304
-chilena        67041249
+no info       160562594
+chilena        66858252
 extranjera         2566
 Name: pais_m, dtype: int64
 
-cotizante    125661911
+cotizante    125354234
 hijo          77051520
-conyuge       17620825
-no info        6536176
+conyuge       17620812
+no info        6536159
 parent          860687
 Name: codrel, dtype: int64
 
-cotizante       125644706
-carga           101874786
+cotizante       125337071
+carga           101874718
 beneficiario       182604
-no info             29023
+no info             29019
 Name: typben, dtype: int64
 
 -- Final dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 227731119 entries, 0 to 227731118
+RangeIndex: 227423412 entries, 0 to 227423411
 Data columns (total 13 columns):
 month     int32
 isapre    int8
@@ -92,11 +93,11 @@ dtypes: Int32(2), category(7), int32(3), int8(1)
 memory usage: 6.6 GB
 
 -- Descriptive statistics for tex file
-\item Observations: 227731119
-\item Families: 2579529
-\item Individuals: 4407426
-\item Men: 54.33\%
-\item Main insured: 55.17\%
+\item Observations: 227423412
+\item Families: 2575393
+\item Individuals: 4399932
+\item Men: 54.31\%
+\item Main insured: 55.11\%
 \item Median number of months by family: 58.0
 
 -- Create dictionary of families
@@ -105,18 +106,18 @@ memory usage: 6.6 GB
 -- Slices equal to concat dataframe: True
 
 -- Begin pickling 
--- Time elapsed first half:  37 sec.
--- Time elapsed second half: 35 sec.
+-- Time elapsed first half:  31 sec.
+-- Time elapsed second half: 31 sec.
 
--- Total time elapsed: 64 min. / 3856 sec.
+-- Total time elapsed: 63 min. / 3809 sec.
 
--- Timestamp: 2019-08-06 00:35:21
+-- Timestamp: 2019-08-23 21:31:54
 
 
 
 
 -- Executing: health\derived\append\code/caec.py
--- Timestamp: 2019-08-06 02:58:15
+-- Timestamp: 2019-08-23 23:44:52
 
 -- Begin pool 
 -- Time pool.map and concat:  6 sec.
@@ -162,23 +163,23 @@ dtype: int64
 
 -- Total time elapsed: 0 min. / 9 sec.
 
--- Timestamp: 2019-08-06 02:58:25
+-- Timestamp: 2019-08-23 23:45:02
 
 
 
 
 -- Executing: health\derived\append\code/contracts.py
--- Timestamp: 2019-08-06 02:58:27
+-- Timestamp: 2019-08-23 23:45:03
 
 -- Begin pool 
--- Time pool.map and concat:  580 sec.
+-- Time pool.map and concat:  568 sec.
 -- Drop if id_alt!=0  :  646772 rows dropped (0.48%)
 -- Value counts merge families
--- Drop if not in beneficiaries:  2990872 rows dropped (2.27%)
+-- Drop if not in beneficiaries:  3154280 rows dropped (2.39%)
 
 -- Concat dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 128666512 entries, 0 to 128666511
+RangeIndex: 128503104 entries, 0 to 128503103
 Data columns (total 14 columns):
 month       int32
 isapre      int8
@@ -199,19 +200,19 @@ memory usage: 9.7 GB
 
 -- Descriptive stats
 
-INDIVIDUAL               96292420
-INDIVIDUAL COMPENSADO    18287380
-GRUPAL                   14086346
-S/E                           366
+indiv      96158818
+indcom     18271997
+group      14071923
+no_info         366
 Name: planingr, dtype: int64
 
-NO APLICA TERMINO CONTRATO                                                          126477504
-DESAHUCIO VOLUNTARIO                                                                  1567029
-POR NO PAGO DE COTIZACIONES POR PARTE DE LOS COTIZANTES VOLUNTARIOS E INDEPENDIE       457904
-DESAHUCIO POR MUTUO ACUERDO                                                             79202
-POR PERDIDA DE LA RELACION LABORAL CUANDO CONSTITUYA UNA CONDICION ESENCIAL PARA        58045
-POR FALLECIMIENTO DEL AFILIADO                                                          19192
-POR FALSEAR O NO ENTREGAR DE MANERA FIDEDIGNA TODA LA INFORMACION EN LA DECLARAC         6229
+NO APLICA TERMINO CONTRATO                                                          126320627
+DESAHUCIO VOLUNTARIO                                                                  1566863
+POR NO PAGO DE COTIZACIONES POR PARTE DE LOS COTIZANTES VOLUNTARIOS E INDEPENDIE       457789
+DESAHUCIO POR MUTUO ACUERDO                                                             79198
+POR PERDIDA DE LA RELACION LABORAL CUANDO CONSTITUYA UNA CONDICION ESENCIAL PARA        58036
+POR FALLECIMIENTO DEL AFILIADO                                                          12960
+POR FALSEAR O NO ENTREGAR DE MANERA FIDEDIGNA TODA LA INFORMACION EN LA DECLARAC         6224
 POR IMPETRAR FORMALMENTE U OBTENER INDBIDAMENTE, PARA EL O PARA ALGUNO DE SUS BE          941
 SIN CLASIFICACION                                                                         373
 POR OMITIR DEL CONTRATO A ALGUN FAMILIAR BENEFICIARIO                                      93
@@ -221,41 +222,42 @@ Name: endtyp, dtype: int64
 -- Slices equal to concat dataframe: True
 
 -- Begin pickling 
--- Time elapsed first half:  43 sec.
--- Time elapsed second half: 43 sec.
+-- Time elapsed first half:  36 sec.
+-- Time elapsed second half: 37 sec.
 
--- Total time elapsed: 29 min. / 1769 sec.
+-- Pickle plan type sample
 
--- Timestamp: 2019-08-06 03:27:56
+-- Total time elapsed: 44 min. / 2652 sec.
+
+-- Timestamp: 2019-08-24 00:29:16
 
 
 
 
 -- Executing: health\derived\append\code/cotiza.py
--- Timestamp: 2019-08-06 01:57:04
+-- Timestamp: 2019-08-23 22:51:15
 
 -- Begin pool 
--- Time pool.map and concat:  2969 sec.
+-- Time pool.map and concat:  2419 sec.
 
 -- Concat dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
 RangeIndex: 184898938 entries, 0 to 184898937
-Data columns (total 13 columns):
-month       int32
-isapre      int8
-id_m        int32
-typpay      category
-e_typ       category
-e_id        int32
-e_name      category
-e_reg       category
-payset      Int32
-paytot      Int32
-paytot_c    Int32
-ti_mon      category
-ti          int32
-dtypes: Int32(3), category(5), int32(4), int8(1)
-memory usage: 7.2 GB
+Data columns (total 12 columns):
+month     int32
+isapre    int8
+id_m      int32
+typpay    category
+e_typ     category
+e_id      int32
+e_name    category
+e_reg     category
+payset    Int32
+ti_mon    category
+ti        int32
+paytot    int32
+dtypes: Int32(1), category(5), int32(5), int8(1)
+memory usage: 6.2 GB
 
 -- Descriptive stats
 
@@ -295,23 +297,25 @@ Name: e_reg, dtype: int64
 -- Slices equal to concat dataframe: True
 
 -- Begin pickling 
--- Time elapsed first half:  70 sec.
--- Time elapsed second half: 42 sec.
+-- Time elapsed first half:  55 sec.
+-- Time elapsed second half: 33 sec.
 
--- Total time elapsed: 59 min. / 3599 sec.
+-- Pickle income sample
 
--- Timestamp: 2019-08-06 02:57:05
+-- Total time elapsed: 52 min. / 3153 sec.
+
+-- Timestamp: 2019-08-23 23:43:50
 
 
 
 
 -- Executing: health\derived\append\code/dictionaries.py
--- Timestamp: 2019-08-06 00:36:00
+-- Timestamp: 2019-08-23 21:32:24
 
 -- Begin MONTH dictionary
 
 -- Begin pool PROMUN CODE PROID
--- Time pool.map and concat:  1513 sec.
+-- Time pool.map and concat:  1506 sec.
 
 -- Create PROMUN dictionary
 
@@ -319,15 +323,15 @@ Name: e_reg, dtype: int64
 
 -- Create PROID dictionary
 
--- Total time elapsed: 27 min. | 1657 sec.
+-- Total time elapsed: 27 min. | 1624 sec.
 
--- Timestamp: 2019-08-06 01:03:38
+-- Timestamp: 2019-08-23 21:59:30
 
 
 
 
 -- Executing: health\derived\append\code/hdischarge.py
--- Timestamp: 2019-08-06 02:57:40
+-- Timestamp: 2019-08-23 23:44:22
 
 -- Begin pool 
 -- Time pool.map and concat:  12 sec.
@@ -367,18 +371,18 @@ Name: discond, dtype: int64
 -- Begin pickling 
 -- Time elapsed pickling: 3 sec.
 
--- Total time elapsed: 0 min. / 33 sec.
+-- Total time elapsed: 0 min. / 28 sec.
 
--- Timestamp: 2019-08-06 02:58:14
+-- Timestamp: 2019-08-23 23:44:51
 
 
 
 
 -- Executing: health\derived\append\code/pbonificadas.py
--- Timestamp: 2019-08-06 01:03:59
+-- Timestamp: 2019-08-23 21:59:49
 
 -- Begin pool 
--- Time pool.map and concat:  1788 sec.
+-- Time pool.map and concat:  1865 sec.
 
 -- Concat dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -424,41 +428,41 @@ id_m      1375838232
 dtype: int64
 
 -- Cleaning 
--- Drop if not in beneficiaries:  15759535 rows dropped (4.58%)
--- Time elapsed cleaning : 1026 sec.
+-- Drop if not in beneficiaries:  17936034 rows dropped (5.21%)
+-- Time elapsed cleaning : 904 sec.
 
 -- Descriptive stats 
 
-femenino     175323766
-masculino    129790003
+femenino     174843199
+masculino    128320253
 unborn              67
 NaN                  1
 Name: gender, dtype: int64
 
-cotizante    183475722
-carga        121638115
+cotizante    181525469
+carga        121638051
 Name: typben, dtype: int64
 
-curativa    301958078
-emp           2919276
-child          178544
-pregnant        57939
+curativa    300010431
+emp           2916620
+child          178543
+pregnant        57926
 Name: typreg, dtype: int64
 
-general    208170663
-reduced     96943174
+general    206361197
+reduced     96802323
 no info            0
 Name: planty, dtype: int64
 
-fonasa              283227784
-superintendencia     11633658
-isapre               10251955
-NaN                       440
+fonasa              281502789
+superintendencia     11539337
+isapre               10120956
+NaN                       438
 Name: codeid, dtype: int64
 
 -- Final dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 305113837 entries, 0 to 305113836
+RangeIndex: 303163520 entries, 0 to 303163519
 Data columns (total 18 columns):
 isapre    int8
 month     int32
@@ -482,322 +486,321 @@ dtypes: category(12), int32(4), int8(2)
 memory usage: 10.5 GB
 
 -- Descriptive statistics for tex file
-\item Observations: 305113837
-\item Families: 2311488
-\item Individuals: 4013417
-\item Men: 42.53\%
-\item Main insured: 60.13\%
+\item Observations: 303163520
+\item Families: 2307523
+\item Individuals: 4006381
+\item Men: 42.32\%
+\item Main insured: 59.87\%
 
 -- Split final dataframe 
 
 -- Begin pickling 
--- Time elapsed first third:  46 sec.
--- Time elapsed second third: 50 sec.
--- Time elapsed second third: 38 sec.
+-- Time elapsed first third:  42 sec.
+-- Time elapsed second third: 39 sec.
+-- Time elapsed second third: 33 sec.
 
--- Total time elapsed: 50 min. | 3042 sec.
+-- Total time elapsed: 49 min. | 2958 sec.
 
--- Timestamp: 2019-08-06 01:54:42
+-- Timestamp: 2019-08-23 22:49:08
 
 
 
 
 -- Executing: health\derived\append\code/solicitudges.py
--- Timestamp: 2019-08-06 01:55:03
+-- Timestamp: 2019-08-23 22:49:27
 -- Value counts merge families
--- Drop if not in beneficiaries:  181579 rows dropped (11.83%)
+-- Drop if not in beneficiaries:  193115 rows dropped (12.58%)
 
 -- Dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 1352573 entries, 0 to 1352572
+RangeIndex: 1341037 entries, 0 to 1341036
 Data columns (total 25 columns):
-isapre      1352573 non-null int8
-gessol      1352573 non-null int64
-date        1352573 non-null object
-id_m        1352573 non-null int32
-id_b        1352573 non-null int32
-gender      1352573 non-null category
-dob         1352573 non-null object
-gescod      1352573 non-null category
-event       1352573 non-null category
-evdate      1352573 non-null object
-re_isa      1352573 non-null category
-re_idat     1352573 non-null object
-re_irej     1352573 non-null category
-re_inot     1352573 non-null category
-re_ibdat    1352573 non-null object
-proid       1352573 non-null int32
-re_ben      1352573 non-null category
-re_brej     1352573 non-null category
-gesid       1352573 non-null int64
-pronam      1269280 non-null object
-id_reg      1352573 non-null int32
-icd10       1352573 non-null category
-gessta      1352573 non-null category
-gesclo      1352573 non-null category
-month       1352573 non-null int32
-dtypes: category(11), int32(5), int64(2), int8(1), object(6)
-memory usage: 474.1 MB
+isapre      1341037 non-null int8
+gessol      1341037 non-null int64
+date        1341037 non-null int32
+id_m        1341037 non-null int32
+id_b        1341037 non-null int32
+gender      1341037 non-null category
+dob         1341037 non-null object
+gescod      1341037 non-null category
+event       1341037 non-null category
+evdate      1341037 non-null int32
+re_isa      1341037 non-null category
+re_idat     1341037 non-null object
+re_irej     1341037 non-null category
+re_inot     1341037 non-null category
+re_ibdat    1341037 non-null object
+proid       1341037 non-null int32
+re_ben      1341037 non-null category
+re_brej     1341037 non-null category
+gesid       1341037 non-null int64
+pronam      1258742 non-null object
+id_reg      1341037 non-null int32
+icd10       1341037 non-null category
+gessta      1341037 non-null category
+gesclo      1341037 non-null category
+month       1341037 non-null int32
+dtypes: category(11), int32(7), int64(2), int8(1), object(4)
+memory usage: 349.9 MB
 
 -- Dataframe size
 ---- isapre : 12
-107    406683
-78     296715
-99     233498
-67     198120
+107    399176
+78     295060
+99     232588
+67     198118
 81     123300
-80      37008
-63      25126
+80      36749
+63      24164
 76      23538
-65       6121
-68       1373
+65       5931
+68       1337
 Name: isapre, dtype: int64
----- gessol : 906908
-225299    5
-223846    5
-225161    5
-225192    5
-225199    5
-225227    5
-225026    5
-225368    5
-225246    5
-225181    5
+---- gessol : 902200
+225235    5
+225212    5
+225308    5
+225189    5
+225174    5
+225183    5
+191573    5
+225292    5
+225275    5
+225358    5
 Name: gessol, dtype: int64
 ---- date : 3608
-2013-08-05    1115
-2013-08-08    1108
-2013-07-29    1106
-2013-08-19    1099
-2013-08-12    1090
-2013-07-15    1085
-2013-08-26    1066
-2013-07-24    1052
-2013-07-31    1047
-2013-08-20    1042
+20130805    1105
+20130808    1100
+20130729    1089
+20130819    1088
+20130812    1073
+20130715    1070
+20130826    1059
+20130724    1045
+20130820    1035
+20130731    1034
 Name: date, dtype: int64
----- id_m : 706834
+---- id_m : 702984
 1276586    40
-2472235    30
 1034600    30
+2472235    30
 603765     29
 2751062    28
 3206769    27
 2299495    26
 2359053    26
 790953     25
-1496894    23
+2717706    23
 Name: id_m, dtype: int64
----- id_b : 886589
+---- id_b : 881546
 2472235    30
 3078272    21
-170660     19
 958042     19
+170660     19
+2659126    18
 8266025    18
 6650354    18
-2659126    18
-8271455    17
-8389141    17
 5986001    17
+2972911    17
+8271455    17
 Name: id_b, dtype: int64
 ---- gender : 4
-Femenino     746671
-Masculino    605502
-No nato         399
+Femenino     743849
+Masculino    596793
+No nato         394
 Error             1
 Name: gender, dtype: int64
----- dob : 35081
-1800-01-01    399
-1956-01-01    374
-1957-01-01    363
-1954-01-01    359
-1952-01-01    356
+---- dob : 34896
+1800-01-01    394
+1956-01-01    373
+1957-01-01    357
+1954-01-01    357
+1952-01-01    353
 1955-01-01    349
-1950-01-01    333
-1961-01-01    313
-1953-01-01    295
-1948-01-01    295
+1950-01-01    329
+1961-01-01    312
+1953-01-01    291
+1948-01-01    290
 Name: dob, dtype: int64
 ---- gescod : 85
-34    184067
-21    172434
+34    183450
+21    171178
 23    122529
-19    117281
-7      82390
-66     70320
-76     69162
-46     55495
+19    117280
+7      81442
+66     70316
+76     69000
+46     55293
 39     48710
-61     38788
+61     38672
 Name: gescod, dtype: int64
 ---- event : 3
-No aplicable    731091
-Confirmaci?n    429138
-Sospecha        192344
-Error                0
+tto_or_und      726285
+confirmation    424583
+suspicion       190169
 Name: event, dtype: int64
----- evdate : 3750
-1800-01-01    731091
-3000-01-01       572
-2016-06-20       522
-2013-08-05       522
-2016-06-06       519
-2013-10-07       513
-2016-07-11       510
-2016-05-16       509
-2013-07-29       508
-2016-07-04       505
+---- evdate : 3743
+18000101    726852
+20160606       517
+20160620       516
+20130805       512
+20160516       509
+20160711       509
+20131007       507
+20160704       503
+20130729       502
+20160705       498
 Name: evdate, dtype: int64
 ---- re_isa : 4
-Aceptaci?n    1280387
-Rechazo         31416
-Anulaci?n       23454
-En tr?mite      17316
+Aceptaci?n    1269728
+Rechazo         31084
+Anulaci?n       23023
+En tr?mite      17202
 Error               0
 Name: re_isa, dtype: int64
----- re_idat : 3723
-1800-01-01    17316
-2011-08-11     2226
-2013-08-19     1080
-2013-07-29     1072
-2013-08-12     1043
-2013-08-05     1038
-2013-08-20     1028
-2013-08-26     1024
-2013-07-24     1019
-2013-07-15     1016
+---- re_idat : 3721
+1800-01-01    17202
+2011-08-11     2211
+2013-08-19     1067
+2013-07-29     1056
+2013-08-05     1029
+2013-08-12     1026
+2013-08-20     1019
+2013-08-26     1016
+2013-07-24     1012
+2013-07-15     1003
 Name: re_idat, dtype: int64
 ---- re_irej : 7
-0    1321178
-3      19626
-6       6811
-5       2937
-4       1101
-1        825
-2         95
+0    1309974
+3      19423
+6       6768
+5       2861
+4       1095
+1        822
+2         94
 Name: re_irej, dtype: int64
 ---- re_inot : 3
-Si              1309494
-No aplicable      40770
-No                 2309
+Si              1298512
+No aplicable      40225
+No                 2300
 Error                 0
 Name: re_inot, dtype: int64
----- re_ibdat : 3793
-1800-01-01    42856
-2011-08-11     2181
-2013-07-01     1951
-2016-07-01     1328
-2016-06-28     1143
-2016-06-30     1114
-2016-06-06     1105
-2016-06-20     1079
-2016-06-29     1065
-2016-06-07     1060
+---- re_ibdat : 3792
+1800-01-01    42302
+2011-08-11     2168
+2013-07-01     1941
+2016-07-01     1320
+2016-06-28     1133
+2016-06-30     1109
+2016-06-06     1101
+2016-06-20     1073
+2016-06-29     1061
+2016-06-07     1055
 Name: re_ibdat, dtype: int64
----- proid : 2600
-1912862    254878
-6601996    111719
-1128315     80474
-1529982     76473
-112500      74390
-3299228     47489
-2223839     42403
-432605      36208
-2569783     35230
-1003228     31355
+---- proid : 2585
+1912862    252997
+6601996    111550
+1128315     80311
+1529982     75531
+112500      74237
+3299228     47290
+2223839     42222
+432605      36114
+2569783     35027
+1003228     30893
 Name: proid, dtype: int64
 ---- re_ben : 5
-Aceptaci?n      1216986
-Pendiente         68612
-No aplicable      40773
-Rechazo           26148
-Error                54
+Aceptaci?n      1206724
+Pendiente         68048
+No aplicable      40228
+Rechazo           25986
+Error                51
 Name: re_ben, dtype: int64
 ---- re_brej : 4
-Error                                                                   1326850
-Otra causal                                                               24585
-Beneficiario prefiere cobertura financiera de su plan complementario        975
-Beneficiario rechaza el prestador designado por la Aseguradora              163
+Error                                                                   1315472
+Otra causal                                                               24454
+Beneficiario prefiere cobertura financiera de su plan complementario        951
+Beneficiario rechaza el prestador designado por la Aseguradora              160
 Name: re_brej, dtype: int64
----- gesid : 1280199
-0            71641
-670225346        2
+---- gesid : 1269540
+0            70764
+670111269        2
+670118743        2
 670163275        2
-670111237        2
-670225209        2
+670111254        2
 670225194        2
-670225343        2
-670225184        2
-670225264        2
-670092172        2
+107178670        2
+670120699        2
+670225346        2
+670111237        2
 Name: gesid, dtype: int64
----- pronam : 6616
-MEGASALUD S.A                        195545
-INTEGRAMEDICA S.A                     95071
-NaN                                   83293
-SALCOBRAND S.A.                       43095
-FARMACIAS CRUZ VERDE                  40808
-SOCIEDAD PSICOMEDICA LTDA.            32431
-MEGASALUD S.A.                        28496
-PLUSMEDICA S.A.                       28073
-INTEGRAMEDICA CENTROS MEDICOS S.A     27717
-REDGESAM S.A                          26011
+---- pronam : 6592
+MEGASALUD S.A                        193764
+INTEGRAMEDICA S.A                     94916
+NaN                                   82295
+SALCOBRAND S.A.                       42708
+FARMACIAS CRUZ VERDE                  40694
+SOCIEDAD PSICOMEDICA LTDA.            32230
+MEGASALUD S.A.                        28397
+INTEGRAMEDICA CENTROS MEDICOS S.A     27632
+PLUSMEDICA S.A.                       27611
+REDGESAM S.A                          25962
 Name: pronam, dtype: int64
----- id_reg : 413810
-148    12
-444    12
-448    12
-351    12
-453    12
-350    12
-456    12
-210    12
-460    12
-26     12
+---- id_reg : 411510
+58     12
+332    12
+474    12
+334    12
+315    12
+74     12
+395    12
+287    12
+223    12
+426    12
 Name: id_reg, dtype: int64
----- icd10 : 1627
-0        498038
-F32.9     84334
-I10.X     47143
-I10       46134
-Z01.2     44678
-E03.9     32886
-J45.9     32627
-E03       27158
-E14       24670
+---- icd10 : 1620
+0        491506
+F32.9     84032
+I10.X     46886
+I10       46078
+Z01.2     44655
+E03.9     32844
+J45.9     32617
+E03       27049
 K02       24622
+E14       24471
 Name: icd10, dtype: int64
 ---- gessta : 3
-Cerrado         750824
-Activo          529614
-No aplicable     72135
+Cerrado         740214
+Activo          529565
+No aplicable     71258
 Error                0
 Name: gessta, dtype: int64
 ---- gesclo : 9
-No aplica                                             602376
-Cambio de prevision del sistema de atencion de sal    174160
-Termino del tratamiento                               168520
-Exclusion por protocolo o guias clinicas              137004
-Por rechazo al prestador o al tratamiento             126874
-Tres inasistencias a citaciones efectivas y regist     94365
-No cumple criterios de inclusion                       32648
-Otra causa expresada por el paciente                    9998
-Fallecimiento                                           6628
+No aplica                                             601389
+Cambio de prevision del sistema de atencion de sal    170164
+Termino del tratamiento                               167703
+Exclusion por protocolo o guias clinicas              135923
+Por rechazo al prestador o al tratamiento             125277
+Tres inasistencias a citaciones efectivas y regist     94115
+No cumple criterios de inclusion                       32409
+Otra causa expresada por el paciente                    9984
+Fallecimiento                                           4073
 Error                                                      0
 Name: gesclo, dtype: int64
 ---- month : 147
-201307    20603
-201308    20242
-201606    18595
-201310    18261
-201608    18168
-201605    17968
-201705    17805
-201607    17673
-201708    17301
-201706    17164
+201307    20395
+201308    20081
+201606    18513
+201310    18100
+201608    18098
+201605    17891
+201705    17750
+201607    17593
+201708    17258
+201706    17126
 Name: month, dtype: int64
 
--- Total time elapsed: 2 min. | 120 sec.
+-- Total time elapsed: 1 min. | 106 sec.
 
--- Timestamp: 2019-08-06 01:57:03
+-- Timestamp: 2019-08-23 22:51:14
