@@ -89,21 +89,32 @@ def clean_df_concat(df):
     assert len(df2.loc[df2['is_dupl']==1]) == 0
     l4 = len(df2)
     print('-- Drop if dupl. keys :  ' + str(l3-l4) + ' rows dropped (' + str(int((l3-l4)/l0*10000)/100) + '%)')
+
+    df2['Ndod0'] = (~df2['dod_m'].isin([18000101,20001114,30000101]))
+    df2['Ndod1'] = df2.groupby(['id_m','id_b'])['Ndod0'].transform('max')
+    df2 = df2.loc[df2['Ndod1']==0]
+    l5 = len(df2)
+    print('-- Drop if dead :  ' + str(l4-l5) + ' rows dropped (' + str(int((l4-l5)/l0*10000)/100) + '%)')
     
-    df2.drop(columns=['valid','idalt_nonzero','id_m_alt','id_b_alt','idb_rutzero','is_dupl','dupl_keys'], inplace=True)
+    df2.drop(columns=['Ndod0','Ndod1','valid','idalt_nonzero','id_m_alt','id_b_alt','idb_rutzero','is_dupl','dupl_keys'], inplace=True)
     
     for c in col_cat:
         df2[c] = df2[c].astype('category')
 
     assert df2.duplicated(['month','isapre','id_m','id_b'],keep=False).values.sum() == 0
     assert len(df2.columns) == 13
+    assert    df2.dob.isnull().sum()==0
+    assert  df2.month.isnull().sum()==0
+    assert df2.isapre.isnull().sum()==0
     
     df2['isapre'] = df2['isapre'].astype('int8')
     df2['month']  =  df2['month'].astype('int32')
     df2['id_m']   =   df2['id_m'].astype('int32')
     df2['id_b']   =   df2['id_b'].astype('int32')
+    df2.reset_index(drop=True,inplace=True)
 
     print('-- Total rows dropped : ' + str(l0-len(df2)) + ' rows dropped (' + str(int((l0-len(df2))/l0*10000)/100) + '%)')
+    del l0, l1, l2, l3, l4, l5
     return df2
 
 def main():

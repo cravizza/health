@@ -102,6 +102,12 @@ def main():
     df_final.info(memory_usage='deep')
 
     print('\n-- Descriptive stats')
+    df_final['planingr'] = df_final['planingr'].str.replace('GRUPAL','group').str.strip()
+    df_final['planingr'] = df_final['planingr'].str.replace('^INDIVIDUAL$','indiv').str.strip()
+    df_final['planingr'] = df_final['planingr'].str.replace('^INDIVIDUAL COMPENSADO$','indcom').str.strip()
+    df_final['planingr'] = df_final['planingr'].str.replace('S/E','no_info').str.strip()
+    df_final['planingr'] = df_final['planingr'].astype('category')
+    df_final['planingr'].cat.remove_unused_categories(inplace=True)
     for c in ['planingr','endtyp']:
         print('\n' + str(df_final[c].value_counts(dropna=False)))
         
@@ -121,6 +127,10 @@ def main():
     start02 = time.time()
     df2.to_pickle(pDerived + 'contracts2')
     print('-- Time elapsed second half: ' + str(int(time.time() - start02)) + ' sec.')
+
+    print('\n-- Pickle plan type sample')
+    dfc = df_final[['month','id_m','planingr']].drop_duplicates()
+    dfc.to_pickle(pDerived + 'contracts_plantype')
 
     print('\n-- Total time elapsed: ' + str(int((time.time() - start0)/60)) + ' min. / ' + str(int(time.time() - start0)) + ' sec.')
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
