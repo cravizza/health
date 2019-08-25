@@ -87,9 +87,9 @@ def clean_df_concat(df):
     
     final_df = final_df.loc[final_df['date'].notnull()] 
     final_df = final_df.loc[final_df['code'].notnull()]
+    final_df = final_df.loc[final_df['isapre'].notnull()]
     final_df['code2'] = final_df.code.str.zfill(7).str[0:2]  # var of first two digits of codes
     final_df['code7'] = final_df.code.str.zfill(7)
-
     final_df['isapre'] = final_df['isapre'].astype('int8')
     final_df['month']  =  final_df['month'].astype('int32')
     final_df['id_m']   =   final_df['id_m'].astype('int32')
