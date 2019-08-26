@@ -3,7 +3,6 @@ import os
 def main():
 	# Run code
 	os.system('python seasonality.py')
-	os.system('python solicitudges.py')
 	os.system('python hiv.py')
 
 	# Logging

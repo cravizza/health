@@ -3,284 +3,165 @@ Logging: health\derived\clean\code
 
 
 -- Executing: health\derived\clean\code/hiv.py
--- Timestamp: 2019-08-03 23:12:13
+-- Timestamp: 2019-08-25 23:14:13
 
--- Time elapsed load and concat: 61 sec.
+-- Beneficiaries, time elapsed load and concat: 59 sec.
 
--- Time elapsed load and concat: 327 sec.
+-- Construct subsample: balanced 2012-2017, ages 18-50 on 31Dec2017
+-- Keep if balanced: 66451276 rows dropped (46.75%)
+-- Construct subsample: balanced 2015-2017, ages 18-50 on 31Dec2017
+-- Keep if balanced: 19906958 rows dropped (30.12%)
+-- Subsample beneficiaries, time elapsed: 441 sec.
+count    1.754482e+08
+mean     7.681073e+05
+std      6.688890e+05
+min      0.000000e+00
+25%      1.063690e+05
+50%      6.667040e+05
+75%      1.336757e+06
+max      1.522648e+09
+Name: ti, dtype: float64
+count    1.754482e+08
+mean     8.625230e+04
+std      2.737011e+05
+min     -8.693200e+04
+25%      3.691800e+04
+50%      7.432400e+04
+75%      1.204810e+05
+max      9.593604e+08
+Name: paytot, dtype: float64
+salaried     141116324
+indep_vol     22318384
+other         12013475
+Name: e_typ, dtype: int64
+indiv      95474687
+indcom     18198896
+group      14061983
+no_info         366
+Name: planingr, dtype: int64
 
--- Time elapsed load: 0 sec.
+-- Income and contracts, time elapsed load and concat: 66 sec.
 
--- Create sample of 2017 beneficiaries
+-- Pbon, time elapsed load and concat: 817 sec.
 
--- Create HIV sample
+-- Create HIV subample of pbon
+-- Drop if pregnant: 36958649 rows dropped (12.19%)
+-- Subsample pbon, time elapsed: 202 sec.
+
+-- Create dataset for aggregate analysis
+-- Families
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 745766 entries, 0 to 745765
+RangeIndex: 454722 entries, 0 to 454721
+Data columns (total 14 columns):
+month     454722 non-null int32
+id_m      454722 non-null int32
+isapre    454722 non-null int8
+id_b      454722 non-null int32
+dob       454722 non-null int32
+dod_m     454722 non-null int32
+gender    454722 non-null category
+civs_m    454722 non-null category
+pais_m    454722 non-null category
+munici    454722 non-null object
+region    454722 non-null object
+codrel    454722 non-null category
+typben    454722 non-null category
+hiv       454722 non-null int8
+dtypes: category(5), int32(5), int8(2), object(2)
+memory usage: 50.0 MB
+-- Pbon
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 3103731 entries, 0 to 3103730
+Data columns (total 17 columns):
+month     int32
+id_m      int32
+id_b      int32
+isapre    int8
+typreg    category
+gender    category
+age       int8
+typben    category
+code      object
+codeid    category
+date      int32
+copay     int32
+planty    category
+proreg    category
+promun    category
+code2     category
+code7     object
+dtypes: category(8), int32(5), int8(2), object(2)
+memory usage: 375.9 MB
+-- HIV aggregate, time elapsed: 283 sec.
+
+-- Create dataset for individual analysis
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 21408 entries, 0 to 21407
 Data columns (total 3 columns):
-id_m     745766 non-null int32
-id_b     745766 non-null int32
-month    745766 non-null int32
+id_m     21408 non-null int32
+id_b     21408 non-null int32
+month    21408 non-null int32
 dtypes: int32(3)
-memory usage: 8.5 MB
-
--- Families of hiv testers
+memory usage: 250.9 KB
+-- Families
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 1473620 entries, 0 to 1473619
-Data columns (total 14 columns):
-month     1473620 non-null int32
-id_m      1473620 non-null int32
-isapre    1473620 non-null int8
-id_b      1473620 non-null int32
-dob       1473620 non-null int32
-dod_m     1473620 non-null int32
-gender    1473620 non-null category
-civs_m    1473620 non-null category
-pais_m    1473620 non-null category
-munici    1473620 non-null object
-region    1473620 non-null object
-codrel    1473620 non-null category
-typben    1473620 non-null category
-hiv       1473620 non-null int8
-dtypes: category(5), int32(5), int8(2), object(2)
-memory usage: 162.0 MB
-
--- Enrollment of hiv testers
+RangeIndex: 43920 entries, 0 to 43919
+Data columns (total 16 columns):
+month      43920 non-null int32
+id_m       43920 non-null int32
+isapre     43920 non-null int8
+id_b       43920 non-null int32
+dob        43920 non-null int32
+dod_m      43920 non-null int32
+gender     43920 non-null category
+civs_m     43920 non-null category
+pais_m     43920 non-null category
+munici     43920 non-null object
+region     43920 non-null object
+codrel     43920 non-null category
+typben     43920 non-null category
+hiv        43920 non-null int8
+control    21157 non-null object
+mD         21157 non-null float64
+dtypes: category(5), float64(1), int32(5), int8(2), object(3)
+memory usage: 6.5 MB
+-- Pbon
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 29221408 entries, 0 to 29221407
-Data columns (total 3 columns):
-id_m     int32
-id_b     int32
-month    int32
-dtypes: int32(3)
-memory usage: 334.4 MB
+RangeIndex: 1603160 entries, 0 to 1603159
+Data columns (total 19 columns):
+id_m       1603160 non-null int32
+id_b       1603160 non-null int32
+control    1603160 non-null bool
+mD         1603160 non-null int32
+isapre     1603160 non-null int8
+month      1603160 non-null int32
+typreg     1603160 non-null category
+gender     1603160 non-null category
+age        1603160 non-null int8
+typben     1603160 non-null category
+code       1603160 non-null object
+codeid     1603160 non-null category
+date       1603160 non-null int32
+copay      1603160 non-null int32
+planty     1603160 non-null category
+proreg     1603160 non-null category
+promun     1603160 non-null category
+code2      1603160 non-null object
+code7      1603160 non-null object
+dtypes: bool(1), category(7), int32(6), int8(2), object(3)
+memory usage: 266.0 MB
 
--- Pbon of hiv testers
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 11550988 entries, 0 to 11550987
-Data columns (total 18 columns):
-month       int32
-id_m        int32
-id_b        int32
-isapre      int8
-typreg      category
-gender      category
-age         int8
-typben      category
-code        object
-codeid      category
-date        category
-copay       int32
-planty      category
-proreg      category
-promun      category
-code2       object
-code7       object
-pregnant    bool
-dtypes: bool(1), category(8), int32(4), int8(2), object(3)
-memory usage: 1.8 GB
+-- HIV individual, time elapsed: 205 sec.
 
--- Pbon of hiv confirmed
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 56568 entries, 0 to 56567
-Data columns (total 18 columns):
-month       56568 non-null int32
-id_m        56568 non-null int32
-id_b        56568 non-null int32
-isapre      56568 non-null int8
-typreg      56568 non-null category
-gender      56568 non-null category
-age         56568 non-null int8
-typben      56568 non-null category
-code        56568 non-null object
-codeid      56568 non-null category
-date        56568 non-null category
-copay       56568 non-null float64
-planty      56568 non-null category
-proreg      56568 non-null category
-promun      56568 non-null category
-code2       56568 non-null object
-code7       56568 non-null object
-pregnant    56568 non-null int8
-dtypes: category(8), float64(1), int32(3), int8(3), object(3)
-memory usage: 9.5 MB
-
--- Difference-in-differences
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 2876874 entries, 0 to 2876873
-Data columns (total 21 columns):
-id_m        int32
-id_b        int32
-N           int64
-m           int32
-control     int64
-isapre      int8
-month       int32
-typreg      category
-gender      category
-age         int8
-typben      category
-code        object
-codeid      category
-date        category
-copay       int32
-planty      category
-proreg      category
-promun      category
-code2       object
-code7       object
-pregnant    int8
-dtypes: category(8), int32(5), int64(2), int8(3), object(3)
-memory usage: 516.0 MB
-
--- Families of did sample
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 2042744 entries, 0 to 2042743
-Data columns (total 14 columns):
-id_m       int32
-month      int32
-isapre     int8
-id_b       int32
-dob        int32
-dod_m      int32
-gender     category
-civs_m     category
-pais_m     category
-munici     object
-region     object
-codrel     category
-typben     category
-control    int8
-dtypes: category(5), int32(5), int8(2), object(2)
-memory usage: 224.6 MB
-
--- Event study - placebo
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 2585357 entries, 0 to 2585356
-Data columns (total 21 columns):
-id_m        int32
-id_b        int32
-N           int64
-m           int32
-control     int64
-isapre      int8
-month       int32
-typreg      category
-gender      category
-age         int8
-typben      category
-code        object
-codeid      category
-date        category
-copay       int32
-planty      category
-proreg      category
-promun      category
-code2       object
-code7       object
-pregnant    int8
-dtypes: category(8), int32(5), int64(2), int8(3), object(3)
-memory usage: 463.7 MB
-
--- Families of es-placebo sample
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 1726114 entries, 0 to 1726113
-Data columns (total 14 columns):
-id_m       int32
-month      int32
-isapre     int8
-id_b       int32
-dob        int32
-dod_m      int32
-gender     category
-civs_m     category
-pais_m     category
-munici     object
-region     object
-codrel     category
-typben     category
-control    int8
-dtypes: category(5), int32(5), int8(2), object(2)
-memory usage: 189.8 MB
-
--- Timestamp: 2019-08-03 23:48:56
+-- Timestamp: 2019-08-25 23:48:49
 
 
 
 
 -- Executing: health\derived\clean\code/seasonality.py
--- Timestamp: 2019-08-03 23:06:39
+-- Timestamp: 2019-08-25 23:10:51
 
--- Time elapsed load and concat: 104 sec.
-
-
--- Timestamp: 2019-08-03 23:12:01
+-- Time elapsed load and concat: 40 sec.
 
 
-
-
--- Executing: health\derived\clean\code/solicitudges.py
--- Timestamp: 2019-08-03 23:12:04
-
--- Dataframe dtypes
-<class 'pandas.core.frame.DataFrame'>
-Int64Index: 8876 entries, 43 to 1352541
-Data columns (total 25 columns):
-isapre      8876 non-null int8
-gessol      8876 non-null int64
-date        8876 non-null object
-id_m        8876 non-null int32
-id_b        8876 non-null int32
-gender      8876 non-null category
-dob         8876 non-null object
-gescod      8876 non-null category
-event       8876 non-null category
-evdate      8876 non-null object
-re_isa      8876 non-null category
-re_idat     8876 non-null object
-re_irej     8876 non-null category
-re_inot     8876 non-null category
-re_ibdat    8876 non-null object
-proid       8876 non-null int32
-re_ben      8876 non-null category
-re_brej     8876 non-null category
-gesid       8876 non-null int64
-id_reg      8876 non-null int32
-icd10       8876 non-null category
-gessta      8876 non-null category
-gesclo      8876 non-null category
-month       8876 non-null int32
-icd10hiv    8876 non-null bool
-dtypes: bool(1), category(11), int32(5), int64(2), int8(1), object(5)
-memory usage: 2.7 MB
-None
-
--- Dataframe size
-Index        71008
-isapre        8876
-gessol       71008
-date        452676
-id_m         35504
-id_b         35504
-gender        9069
-dob         452676
-gescod       15086
-event         9077
-evdate      452676
-re_isa        9122
-re_idat     452676
-re_irej       9170
-re_inot       9061
-re_ibdat    452676
-proid        35504
-re_ben        9124
-re_brej       9186
-gesid        71008
-id_reg       35504
-icd10        93722
-gessta        9070
-gesclo        9585
-month        35504
-icd10hiv      8876
-dtype: int64
-
--- Timestamp: 2019-08-03 23:12:12
+-- Timestamp: 2019-08-25 23:14:10
