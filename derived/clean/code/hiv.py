@@ -12,7 +12,7 @@ import sys
 # Define globals
 pDerived = 'D:/Personal Directory/Catalina/Derived/'
 code_prg = ['0404002','2004001','2004002','2004003','2004004','2004005','2004006','2004007','2004008'
-           ,'2004009','2004010','2004011','2004012','2004013','0101007','2501009']
+           ,'2004009','2004010','2004011','2004012','2004013','0101007','2501009','0404122']
     
 def balanced_df(input_df,max_months):
     output_df = input_df[['id_m','id_b','month']].copy().drop_duplicates()
