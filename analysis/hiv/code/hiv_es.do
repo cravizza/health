@@ -6,8 +6,7 @@ set more off
 
 program main
 	qui do ..\globals.do
-	create_sample, file_name("hiv_did")
-	create_sample, file_name("hiv_es_p")
+	create_sample, file_name("ind_pbon")
 	*keep if N<4 & m>201415
 	
 	global controls = " civs N regionid "
@@ -208,30 +207,21 @@ capture program drop create_sample
 program              create_sample	
 syntax, file_name(str)
 	use ..\temp\\`file_name'.dta, clear
-	if "`file_name'" == "hiv_did" {
-		local plac = ""
-	}
-	else if "`file_name'" == "hiv_es_p" {
-		local plac = "_placebo"
-		//drop if date_pb>=td(01Jul2017)
-	}
-	rename date_hivm date_hivm2`plac'
-	format %td date_hivm2`plac'
-	gen Week_hivm`plac' = wofd(date_hivm2`plac')
-	format %tw Week_hivm`plac'
-	gen Month_hivm`plac' = mofd(date_hivm2`plac')
-	format %tm Month_hivm`plac'
+	assert !mi(date_hivm) & !mi(id_b) & !mi(id_m)
+	assert inlist(control,0,1)
 	* Time variable
-	gen post_Week`plac'  = Week  - Week_hivm`plac'
-	gen post_Month`plac' = Month - Month_hivm`plac'
-	gen post_static`plac' = (date_pb > date_hivm2`plac') if date_pb!=date_hivm2`plac' & inrange(post_Week`plac',-12,12)
-	* Subsample
-	keep if pregnant==0
-	assert !mi(id_b) & !mi(id_m) & ! mi(post_Week`plac')
+	gen Week_hivm   = wofd(date_hivm)
+	format %tw Week_hivm
+	gen Month_hivm  = mofd(date_hivm)
+	format %tm Month_hivm
+	gen post_Week   = Week  - Week_hivm
+	gen post_Month  = Month - Month_hivm
+	gen post_static = (date_pb > date_hivm) if date_pb!=date_hivm & inrange(post_Week,-12,12)
+	* New vars
 	encode region, g(regionid)
 	encode munici, g(municiid)
 	bys id_m id_b date_pb: egen n_pb = count(isapre)
-	replace civs=0 if inlist(civs,.,3,4)
+	replace civs=0 if inlist(civs,.,3,4)	
 	save ..\temp\\`file_name'_dates.dta, replace
 end
 

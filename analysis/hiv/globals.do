@@ -36,3 +36,9 @@
 	global hiv5_Day_tlinelab    = `"tline(20Jul2017 28Jul2017 03Aug2017, lc(black) lp(dash)) tmlab(${hiv5_Day_lab}, tp(inside) labs(*0.9) labgap(*.3))"'
 	global hiv5_Week_tlinelab = `"tline(2017w29 2017w30, lc(gs8) lp(shortdash)) tline(2017w31, lc(black) lp(dash)) tmlab(${hiv5_Week_lab}, tp(inside) labs(*0.9) labgap(*.3))"'
  
+* Codes
+	global code_std1 = `""0306016","0306023","0306034","0306037","0306038","0306042","0306041","0308044","0306075""'
+	global code_std2 = `""0306076","0306078","0306079","0306080","0306081","0306082","0306169","0801001""'
+	global code_gyn  = `""0101308","0101332""'
+	global code_hiv  = `""0306169""'
+	global code_pap  = `""0801001""'
