@@ -52,7 +52,7 @@ def clean_single_df(df):
     # Typpay
     df['typpay'].replace(to_replace=r'(.*declaracion y pago.*)'       ,value='dec_pay'      ,regex=True,inplace=True)
     df['typpay'].replace(to_replace=r'(.*no declarada ni pagada.*)'   ,value='no_dec_no_pay',regex=True,inplace=True)
-    df['typpay'].replace(to_replace=r'(.*otra.*|.*gratifi.*)'         ,value='other'        ,regex=True,inplace=True)
+    df['typpay'].replace(to_replace=r'(.*otra.*|.*gratifi.*|sin especificar)',value='other' ,regex=True,inplace=True)
     df['typpay'].replace(to_replace=r'(.*declaracion y no pago.*)'    ,value='dec_no_pay'   ,regex=True,inplace=True)
     df['typpay'].replace(to_replace=r'(.*pago declaracion anterior.*)',value='pay_prev_dec' ,regex=True,inplace=True)
     # Employer type
@@ -148,15 +148,20 @@ def main():
     del df1, df2
     
     print('\n-- Pickle income sample')
-    dfi = df_concat.loc[df_concat.ti>=0,['month','id_m','ti','e_typ','paytot']].drop_duplicates()
+    dfi = df_concat.loc[(df_concat.ti>=0)&(~df_concat.typpay.isin(['other','no_dec_no_pay'])),['month','ti_mon','id_m','ti','e_typ','paytot']].drop_duplicates()
     dfi.reset_index(drop=True,inplace=True)
-    len1 = int(len(dfi)/2)
-    df1 = dfi[0:len1]
-    df2 = dfi[len1:]
+    dfi['ti_mon']   = dfi['ti_mon'].astype('int32')
+    dfi['temp']     = dfi['e_typ']=='salaried'
+    dfi['salaried'] = dfi.groupby(by=['id_m','ti_mon'])['temp'].transform('max')   
+    dfi['salaried'] = dfi['salaried'].astype('int8')
+    dfi['ti2']      = dfi.groupby(by=['id_m','ti_mon'])['ti'].transform('sum')
+    dfi['paytot2']  = dfi.groupby(by=['id_m','ti_mon'])['paytot'].transform('sum')
+    dfi.drop(columns=['e_typ','temp','ti','month','paytot'], inplace=True)
+    dfi.rename(columns={'ti_mon':'month','ti2':'ti','paytot2':'paytot'}, inplace=True)    
+    dfi = dfi.drop_duplicates().reset_index(drop=True)
+    assert len(dfi) == len(dfi[['id_m','month']].drop_duplicates())
+    dfi.to_pickle(pDerived + 'cotiza_income')
     del dfi
-    df1.to_pickle(pDerived + 'cotiza_income1')
-    df2.to_pickle(pDerived + 'cotiza_income2')
-    del df1, df2
 
     print('\n-- Total time elapsed: ' + str(int((time.time() - start0)/60)) + ' min. / ' + str(int(time.time() - start0)) + ' sec.')
     print('\n-- Timestamp: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

@@ -130,6 +130,11 @@ def main():
 
     print('\n-- Pickle plan type sample')
     dfc = df_final[['month','id_m','planingr']].drop_duplicates()
+    dfc['temp'] = dfc['planingr']=='indcom'
+    dfc['indcom'] = dfc.groupby(by=['id_m','month'])['temp'].transform('max')
+    del dfc['planingr'], dfc['temp']
+    dfc = dfc[['month','id_m','indcom']].drop_duplicates().reset_index(drop=True)
+    assert len(dfc) == len(dfc[['id_m','month']].drop_duplicates())
     dfc.to_pickle(pDerived + 'contracts_plantype')
 
     print('\n-- Total time elapsed: ' + str(int((time.time() - start0)/60)) + ' min. / ' + str(int(time.time() - start0)) + ' sec.')
