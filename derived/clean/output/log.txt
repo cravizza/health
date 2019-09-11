@@ -30,15 +30,12 @@ min      0.000000e+00
 75%      1.356200e+05
 max      3.536526e+08
 Name: paytot, dtype: float64
-salaried     141116324
-indep_vol     22318384
-other         12013475
-Name: e_typ, dtype: int64
-indiv      95474687
-indcom     18198896
-group      14061983
-no_info         366
-Name: planingr, dtype: int64
+1    105256425
+0     19106958
+Name: salaried, dtype: int64
+False    109256096
+True      18198896
+Name: indcom, dtype: int64
 
 -- Income and contracts, time elapsed load and concat: 38 sec.
 
