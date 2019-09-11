@@ -221,6 +221,7 @@ syntax, filename(string)
 	egen  conyuge = max(I_conyuge), by(id_m month isapre)
 	gen      civs = civs_m if typben==1
 	replace  civs = 2 if (conyuge==1 & codrel==1) | codrel==2 
+	replace  civs = 2 if indcom==1 & civs==0
 	replace  civs = 1 if codrel==3
 	assert civs_m==0 if typben!=1
 	drop I_conyuge
@@ -267,11 +268,11 @@ syntax, filename(string)
 		assert inlist(n_i,1,2)
 		keep if n_i==1 | (n_i==2 & isapre==isapre_ok & !mi(isapre_ok))
 		isid id_m id_b
-		keep id_m id_b control partner_fem partner child civs typben codrel region munici dod_m pais_m	
+		keep id_m id_b control salaried ti partner_fem partner child civs typben codrel region munici dod_m pais_m	
 	}
 	if "`filename'" == "agg_fam" {
 		keep if hiv==1
-		keep id_m id_b month isapre partner_fem partner child civs typben codrel region munici dod_m pais_m	
+		keep id_m id_b month isapre salaried ti partner_fem partner child civs typben codrel region munici dod_m pais_m	
 	}
 	save "..\temp\\`filename'.dta", replace
 end
