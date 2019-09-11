@@ -23,17 +23,20 @@ def balanced_df(input_df,max_months):
     l0 = len(output_df)
     output_df = output_df[output_df.Nmonths == max_months]
     l1 = len(output_df)
+    output_df.drop(columns=['Nmonths'], inplace=True)
     print('-- Keep if balanced: ' + str(l0-l1) + ' rows dropped (' + str(int((l0-l1)/l0*10000)/100) + '%)')
     return output_df
     
-def get_fam_df(df_idm,df_idt,benef):
-    interm  = pd.merge(df_idm, benef, how='left', on=['month','id_m'])
+def get_fam_df(df_idm,df_idt,benef,contracts,income):
+    i0 = pd.merge(df_idm,contracts, how='inner', on=['month','id_m'],validate='1:1')
+    i1 = pd.merge(i0    ,income   , how='inner', on=['month','id_m'],validate='1:1')
+    i2 = pd.merge(i1    ,benef    , how='left' , on=['month','id_m'])
     del df_idm
-    df_fam = pd.merge(interm, df_idt, how='left', on=['month','id_m','id_b'])
-    del interm
+    df_fam = pd.merge(i2, df_idt, how='left', on=['month','id_m','id_b'])
+    del i0, i1, i2
     del df_idt
     df_fam['hiv'].fillna(0, inplace=True)
-    for c in ['hiv','isapre']:
+    for c in ['hiv','isapre','indcom','salaried']:
         df_fam[c] = df_fam[c].astype('int8')
     for c in ['id_b','dob','dod_m']:
         df_fam[c] = df_fam[c].astype('int32')
@@ -72,15 +75,12 @@ def main():
     print('-- Subsample beneficiaries, time elapsed: ' + str(int(time.time() - start1)) + ' sec.')
     
     start2 = time.time()
-    df1 = pd.read_pickle(pDerived + 'cotiza_income1')
-    df2 = pd.read_pickle(pDerived + 'cotiza_income2')
-    dfi = pd.concat([df1, df2], axis=0, ignore_index=True)
+    dfi = pd.read_pickle(pDerived + 'cotiza_income')
     print(dfi['ti'].describe())
     print(dfi['paytot'].describe())
-    print(dfi['e_typ'].value_counts(dropna=False).head())
-    del df1, df2
+    print(dfi['salaried'].value_counts(dropna=False).head())
     dfc = pd.read_pickle(pDerived + 'contracts_plantype')
-    print(dfc['planingr'].value_counts(dropna=False).head())
+    print(dfc['indcom'].value_counts(dropna=False).head())
     print('\n-- Income and contracts, time elapsed load and concat: ' + str(int(time.time() - start2)) + ' sec.')
     
     start3 = time.time()
@@ -94,7 +94,7 @@ def main():
     print('\n-- Pbon, time elapsed load and concat: ' + str(int(time.time() - start3)) + ' sec.')    
     
     start4 = time.time()   
-    print('\n-- Create HIV subample of pbon')
+    print('\n-- Create HIV subsample of pbon')
     # Find people that voluntarily take HIV test: pregnant women always take it
     dfp['temp'] = dfp['code7'].isin(code_prg)
     dfp['pregnant'] = dfp.groupby(by=['id_m','id_b'])['temp'].transform('max')
@@ -118,7 +118,7 @@ def main():
     agg_ids = agg_idt[['month','id_m','id_b']].drop_duplicates().copy()
     agg_idm = agg_idt[['month','id_m']].drop_duplicates().copy()
     print('-- Families')
-    agg_fam = get_fam_df(agg_idm,agg_idt,dfb)
+    agg_fam = get_fam_df(agg_idm,agg_idt,dfb,dfc,dfi)
     agg_fam.to_stata('../output/agg_fam.dta') #hiv_fam.dta
     del agg_fam
     print('-- Pbon')
@@ -128,12 +128,13 @@ def main():
         agg_pbon[c] = agg_pbon[c].astype('string')
     agg_pbon.reset_index(drop=True,inplace=True)
     agg_pbon.info(memory_usage='deep')
+    agg_pbon.to_pickle(pDerived + 'agg_pbon')
     agg_pbon.to_stata('../output/agg_pbon.dta') #hiv_pbon.dta
     del agg_pbon
     print('-- HIV aggregate, time elapsed: ' + str(int(time.time() - start5)) + ' sec.')
     
     start6 = time.time()
-    print('\n-- Create dataset for individual analysis')
+    print('\n-- Create dataset for individual analysis: balanced sample of testers')
     ind_hiv0 = hiv_tests[(hiv_tests.date.between(20160720,20160910))|(hiv_tests.date.between(20170720,20170910))].copy()
     ind_hiv = pd.merge(ind_dfb_ids,ind_hiv0,how='inner',on=['id_m','id_b'])
     del ind_hiv0
@@ -150,7 +151,8 @@ def main():
     ind_ids = ind_idt[['month','id_m','id_b']].drop_duplicates().copy()
     ind_hiv[['id_m','id_b','month']].info()
     print('-- Families')
-    ind_fam = get_fam_df(ind_idm,ind_idt,dfb)
+    dfb = dfb.loc[(dfb['month'].between(201607,201609))|(dfb['month'].between(201707,201709))].copy()
+    ind_fam = get_fam_df(ind_idm,ind_idt,dfb,dfc,dfi)
     ind_fam['control'].fillna(9, inplace=True)
     ind_fam['control'] = ind_fam['control'].astype('int8')
     ind_fam.to_stata('../output/ind_fam.dta') #hiv_did_fam.dta
@@ -167,6 +169,7 @@ def main():
         ind_pbon[c] = ind_pbon[c].astype('int8')
     ind_pbon.reset_index(drop=True,inplace=True)
     ind_pbon.info(memory_usage='deep')
+    ind_pbon.to_pickle(pDerived + 'ind_pbon')
     ind_pbon.to_stata('../output/ind_pbon.dta') #hiv_did.dta
     del ind_pbon
     print('\n-- HIV individual, time elapsed: ' + str(int(time.time() - start6)) + ' sec.')
