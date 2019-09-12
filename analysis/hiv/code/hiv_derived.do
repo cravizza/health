@@ -123,14 +123,20 @@ program              create_demo_vars
 	label define proreg_13 13 "Metropolitan region" 1 "Other regions"
 	label values proreg_13 proreg_13
 	* Civs
-	gen married = (partner==1) if child!=1 & inlist(civs,1,2)
-	replace married = 2 if child!=1 & civs==0
-	label define married 0 "Single" 1 "Married" 2 "Unknown"
-	label values married married
 	replace child = 0 if typben==0
-	replace child = . if age_male!=1
+	replace child = . if age_all!=1
 	label define child 0 "Main insured" 1 "Dependent"
 	label values child child
+	gen married = (partner==1) if child!=1 & inlist(civs,1,2)
+	replace married = 2 if child!=1 & civs==0
+	replace married = 0 if child==1
+	label define married 0 "Single" 1 "Married" 2 "Unknown"
+	label values married married
+	* Income
+	qui sum ti if all==1, det
+	gen income_am = (ti>r(p50))
+	label define income_am 0 "Below median" 1 "Above median"
+	label values income_am income_am
 end
 
 capture program drop create_health_vars
@@ -181,6 +187,14 @@ program              create_hiv_vars
 	replace test_n      = 3 if test_n>3
 	label define test_n 1 "First time" 2 "Second time" 3 "3+"
 	label values test_n test_n
+	bys id_b (date_pb): gen days_last_test = date_pb - date_pb[_n-1]
+	gen less_than_yr = (days_last_test<365 & !mi(days_last_test))
+	drop days_last_test
+	label define less_than_yr 0 "No recent test" 1 "Less than a year"
+	label values less_than_yr less_than_yr
+	gen initiation = (N_hiv_test==1)
+	label define initiation 0 "Recurring" 1 "Initiation"
+	label values initiation initiation
 end
 
 capture program drop clean_families

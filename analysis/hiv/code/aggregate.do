@@ -9,35 +9,30 @@ set more off
 program main
 	qui do ..\globals.do
 	
-	set graphics off
-	
-	incidence_plot, time(Month)
-	
-	use ..\temp\hiv_tests.dta, clear
-	replace married=0 if child==1
+	set graphics off	
+	use ..\temp\agg_hiv.dta, clear
 	es_2017_table, time(Week) window(15)
 	es_2017, time(Week) r_var(male) window(15)
 	es_2017, time(Week) r_var(female) window(15)
 	es_2017, time(Week) r_var(all) window(15)
 	
-	keep if enr==1
-	trend_year
-	sb_test, campaign(5) time(Week) r_var(male)
-	foreach byvar in test_n age_male married copay_gr proreg_13 {
-		trends_by_var, time(Week) r_var(male)  by_var(`byvar')
-	}
-	trends_by_var, time(Week) r_var(female) by_var(age_female)
-	trends_by_var, time(Week) r_var(all) by_var(age_all)
+	//trend_year
+	sb_test, campaign(5) time(Week) r_var(all)
 	
-	use ..\temp\hiv_pbon.dta, clear
-	keep if male==1 & enr==1
+	foreach byvar in married less_than_yr initiation income_am age_all {
+		trends_by_var, time(Week) r_var(all)  by_var(`byvar')
+	}
+//	trends_by_var, time(Week) r_var(female) by_var(age_female)
+//	trends_by_var, time(Week) r_var(all) by_var(age_all)
+	
+/*	use ..\temp\agg_pbon.dta, clear
+	keep if male==1
 	sb_test, time(Week) r_var(i_hemogra) campaign(5)
 	sb_test, time(Week) r_var(i_syphili) campaign(5)
 	es_2017, time(Week) r_var(i_hemogra) window(15)	
 	es_2017, time(Week) r_var(i_syphili) window(15)	
-/*	trends_by_var, time(Week) r_var(male) by_var(tests1)
+	trends_by_var, time(Week) r_var(male) by_var(tests1)
 	trends_by_var, time(Week) r_var(male) by_var(tests2)
-	interval_test_conf
 */
 	set graphics on
 end
@@ -47,7 +42,6 @@ program              es_2017_table
 syntax, time(varname) window(int)
 	foreach r_var in all male female {
 		preserve
-			keep if enr==1
 			collapse (count) tests=age (first) Year if `r_var'==1, by(`time')
 			gen `time'no = week(dofw(`time'))
 			gen t = cond(inrange(Week,tw(${hiv5_`time'_L})-`window',tw(${hiv5_`time'_L})+`window'),`time' - tw(${hiv5_`time'_L}) + `window' + 1,0)
@@ -101,7 +95,6 @@ syntax, time(varname) r_var(varname) window(int)
 		graph export ../output/trend5_`r_var'_`time'_all.pdf, replace
 	restore
 	preserve
-		keep if enr==1
 		collapse (count) tests=age (first) Year if `r_var'==1, by(`time')
 		lab var tests "Number of tests"
 		tw line tests `time' if inrange(Year,2016,2017), ${wb} ${hiv5_`time'_tlinelab} lc(midgreen)
@@ -211,7 +204,7 @@ capture program drop trends_by_var
 program              trends_by_var
 syntax, time(varname) r_var(varname) by_var(str)
 	preserve
-		keep if inrange(Year,2016,2017)
+		keep if inrange(Year,2016,2017) & month!=201712
 		collapse (count) tests=age if `r_var'==1 & !mi(`by_var'), by(`time' `by_var')
 		egen total_tests = total(tests), by(`time')
 		gen  sh_tests    = tests/total_tests
@@ -231,45 +224,6 @@ syntax, time(varname) r_var(varname) by_var(str)
 		tw  `sh_plot', ${wb} ${hiv5_`time'_tlinelab} legend(order(`labs') symx(6) c(`N'))	
 		graph export "..\output\trend_sh_`by_var'_`r_var'_`time'.pdf", replace	
 	restore
-end
-
-capture program drop incidence_plot
-program              incidence_plot
-syntax, time(str)
-	use ..\temp\hiv_conf_date.dta, clear
-	gen Week = wofd(date(conf_date),"YMD")
-	format %tw Week 
-	gen Month = mofd(date(conf_date),"YMD")
-	format %tm Month 
-	gen Quarter = qofd(dofm(Month))
-	preserve
-		collapse (count) tests=id_b, by(`time') 
-		lab var tests "Number of HIV confirmations"
-		tw line tests `time', lc(midgreen) ${wb} ${hiv_`time'_tlinelab} ylab(#3)
-		graph export "..\output\trend_conf_`time'.pdf", replace
-	restore
-end
-
-program interval_test_conf
-	use "..\..\..\derived\clean\output\hiv_tests.dta", clear
-	drop  index
-	duplicates drop
-	gen Month = mofd(date(string(month)),"YM")
-	format %tm Month
-	keep  id_b id_m date Month
-	rename date test_date
-	sort  id_b id_m test_date
-	duplicates drop id_b id_m Month, force // 0.6% obs dropped // duplicates tag id_b id_m Month, g(tag)
-	isid id_b id_m Month
-
-	merge m:1 id_m id_b using ..\temp\hiv_conf_date.dta, keep(1 3) nogen
-
-	gen conf_week = wofd(date(conf_date),"YMD")
-	gen test_week = wofd(date(test_date),"YMD")
-	format %tw *_week
-
-	gen interval_w = (conf_week-test_week)
-	gen interval_d = date(conf_date,"YMD") - date(test_date,"YMD")
 end
 
 program trend_year
