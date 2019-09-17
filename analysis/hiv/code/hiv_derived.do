@@ -75,7 +75,7 @@ program              create_demo_vars
 	gen female  = 1 if gender==0
 	lab var male   "Men"
 	lab var female "Non-pregnant women"
-	* Age groups
+	* Age groups 1
 	gen age_18_45 = (inrange(age,18,45))
 	gen age_20_35 = (inrange(age,20,35))
 	local start_list = "18 25 31 41"
@@ -99,13 +99,14 @@ program              create_demo_vars
 	label values age_female  age_groups
 	label values age_all     age_groups
 	gen all = !mi(age_all)
+	* Age groups 2
 	local start_a_list = "15 20 25 30 35 40 45 50"
-	local   end_a_list = "19 24 29 34 39 44 59 60"
+	local   end_a_list = "19 24 29 34 39 44 49 60"
 	gen age_a_male =.
 	gen age_a_female =.
-	local N = `: word count `start_list''
+	local N_a = `: word count `start_a_list''
 	local age_a_groups = ""
-	forv x = 1(1)`N' {
+	forv x = 1(1)`N_a' {
 		local s2: word `x' of `start_a_list'
 		local e2: word `x' of   `end_a_list'
 		local age_a_groups = `"`age_a_groups'"' + `" `x' "`s2'_`e2'" "'
