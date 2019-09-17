@@ -106,16 +106,16 @@ program              create_demo_vars
 	local N = `: word count `start_list''
 	local age_a_groups = ""
 	forv x = 1(1)`N' {
-		local s1: word `x' of `start_a_list'
-		local e1: word `x' of   `end_a_list'
-		local age_a_groups = `"`age_a_groups'"' + `" `x' "`s1'_`e1'" "'
-		replace   age_a_male = `x' if gender==1 & inrange(age,`s1',`e1')
-		replace age_a_female = `x' if gender==0 & inrange(age,`s1',`e1')
+		local s2: word `x' of `start_a_list'
+		local e2: word `x' of   `end_a_list'
+		local age_a_groups = `"`age_a_groups'"' + `" `x' "`s2'_`e2'" "'
+		replace   age_a_male = `x' if gender==1 & inrange(age,`s2',`e2')
+		replace age_a_female = `x' if gender==0 & inrange(age,`s2',`e2')
 	}
 	capture label drop age_a_groups
 	label define age_a_groups `age_a_groups'
-	label values age_a_male    age_groups
-	label values age_a_female  age_groups
+	label values age_a_male    age_a_groups
+	label values age_a_female  age_a_groups
 	* Regions
 	gen     proreg_13 = 13 if proreg==13
 	replace proreg_13 = 1  if proreg!=13
