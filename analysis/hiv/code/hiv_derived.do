@@ -41,6 +41,10 @@ program main
 	format %td date_hivm
 	drop date_hivC
 	assert !mi(date_hivm)
+	drop date_hiv
+	rename date_hivm date_hiv
+	lab define control 0 "Treatment, 2017" 2 "Control, 2016"
+	lab values control control
 	save ..\temp\ind_pbon.dta, replace
 end
 
