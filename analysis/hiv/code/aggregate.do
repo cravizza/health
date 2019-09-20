@@ -204,7 +204,7 @@ capture program drop trends_by_var
 program              trends_by_var
 syntax, time(varname) r_var(varname) by_var(str)
 	preserve
-		keep if inrange(Year,2016,2017) & month!=201712
+		keep if inrange(Year,2016,2017) & month!=201712 //issue ti & civs
 		collapse (count) tests=age if `r_var'==1 & !mi(`by_var'), by(`time' `by_var')
 		egen total_tests = total(tests), by(`time')
 		gen  sh_tests    = tests/total_tests
@@ -221,7 +221,7 @@ syntax, time(varname) r_var(varname) by_var(str)
 		}
 		tw `lev_plot', ${wb} ${hiv5_`time'_tlinelab} legend(order(`labs') symx(6) c(`N'))			
 		graph export "..\output\trend_lv_`by_var'_`r_var'_`time'.pdf", replace	
-		tw  `sh_plot', ${wb} ${hiv5_`time'_tlinelab} legend(order(`labs') symx(6) c(`N'))	
+		tw  `sh_plot', ${wb} ${hiv5_`time'_tlinelab} legend(order(`labs') symx(6) c(`N')) ylab(0(0.25)1)
 		graph export "..\output\trend_sh_`by_var'_`r_var'_`time'.pdf", replace	
 	restore
 end

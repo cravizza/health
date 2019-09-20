@@ -26,6 +26,8 @@ program main
 	create_hiv_vars
 	save ..\temp\agg_hiv.dta, replace //hiv_tests
 
+	clear
+	
 	use "..\..\..\derived\clean\output\ind_pbon.dta", clear
 	merge m:1 id_b id_m using ..\temp\ind_fam.dta, nogen // keep(3)
 	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
@@ -99,6 +101,7 @@ program              create_demo_vars
 	label values age_female  age_groups
 	label values age_all     age_groups
 	gen all = !mi(age_all)
+	keep if inrange(age,12,70)
 	* Age groups 2
 	local start_a_list = "15 20 25 30 35 40 45 50"
 	local   end_a_list = "19 24 29 34 39 44 49 60"
