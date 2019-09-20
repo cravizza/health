@@ -30,7 +30,7 @@ program main
 	
 	use "..\..\..\derived\clean\output\ind_pbon.dta", clear
 	merge m:1 id_b id_m using ..\temp\ind_fam.dta, nogen // keep(3)
-	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
+	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", nogen keep(1 3)
 	* Clean
 	clean_pbon_time	
 	create_demo_vars
@@ -41,9 +41,9 @@ program main
 	format %td date_hivm
 	drop date_hivC
 	assert !mi(date_hivm)
-	drop date_hiv
+	drop date_hiv dod_m pais_m code2
 	rename date_hivm date_hiv
-	lab define control 0 "Treatment, 2017" 2 "Control, 2016"
+	lab define control 0 "Treatment, 2017" 1 "Control, 2016"
 	lab values control control
 	save ..\temp\ind_pbon.dta, replace
 end
