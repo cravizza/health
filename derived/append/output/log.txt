@@ -3,10 +3,10 @@ Logging: health\derived\append\code
 
 
 -- Executing: health\derived\append\code/beneficiaries.py
--- Timestamp: 2019-08-23 20:28:24
+-- Timestamp: 2019-09-09 15:43:01
 
 -- Begin pool 
--- Time pool.map and concat:  1639 sec.
+-- Time pool.map and concat:  1969 sec.
 
 -- Concat dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -38,7 +38,7 @@ memory usage: 11.2 GB
 -- Drop if dupl. keys :  1160250 rows dropped (0.48%)
 -- Drop if dead :  307707 rows dropped (0.12%)
 -- Total rows dropped : 12629306 rows dropped (5.26%)
--- Time elapsed cleaning : 1636 sec.
+-- Time elapsed cleaning : 1914 sec.
 
 -- Descriptive stats
 
@@ -106,18 +106,18 @@ memory usage: 6.6 GB
 -- Slices equal to concat dataframe: True
 
 -- Begin pickling 
--- Time elapsed first half:  31 sec.
--- Time elapsed second half: 31 sec.
+-- Time elapsed first half:  35 sec.
+-- Time elapsed second half: 32 sec.
 
--- Total time elapsed: 63 min. / 3809 sec.
+-- Total time elapsed: 75 min. / 4509 sec.
 
--- Timestamp: 2019-08-23 21:31:54
+-- Timestamp: 2019-09-09 16:58:11
 
 
 
 
 -- Executing: health\derived\append\code/caec.py
--- Timestamp: 2019-08-23 23:44:52
+-- Timestamp: 2019-09-09 19:16:14
 
 -- Begin pool 
 -- Time pool.map and concat:  6 sec.
@@ -161,18 +161,18 @@ dtype: int64
 -- Begin pickling 
 -- Time elapsed pickling: 0 sec.
 
--- Total time elapsed: 0 min. / 9 sec.
+-- Total time elapsed: 0 min. / 11 sec.
 
--- Timestamp: 2019-08-23 23:45:02
+-- Timestamp: 2019-09-09 19:16:25
 
 
 
 
 -- Executing: health\derived\append\code/contracts.py
--- Timestamp: 2019-08-23 23:45:03
+-- Timestamp: 2019-09-09 19:16:26
 
 -- Begin pool 
--- Time pool.map and concat:  568 sec.
+-- Time pool.map and concat:  575 sec.
 -- Drop if id_alt!=0  :  646772 rows dropped (0.48%)
 -- Value counts merge families
 -- Drop if not in beneficiaries:  3154280 rows dropped (2.39%)
@@ -222,23 +222,23 @@ Name: endtyp, dtype: int64
 -- Slices equal to concat dataframe: True
 
 -- Begin pickling 
--- Time elapsed first half:  36 sec.
--- Time elapsed second half: 37 sec.
+-- Time elapsed first half:  45 sec.
+-- Time elapsed second half: 43 sec.
 
 -- Pickle plan type sample
 
--- Total time elapsed: 44 min. / 2652 sec.
+-- Total time elapsed: 58 min. / 3522 sec.
 
--- Timestamp: 2019-08-24 00:29:16
+-- Timestamp: 2019-09-09 20:15:09
 
 
 
 
 -- Executing: health\derived\append\code/cotiza.py
--- Timestamp: 2019-08-23 22:51:15
+-- Timestamp: 2019-09-09 18:22:16
 
 -- Begin pool 
--- Time pool.map and concat:  2419 sec.
+-- Time pool.map and concat:  2518 sec.
 
 -- Concat dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -253,20 +253,19 @@ e_id      int32
 e_name    category
 e_reg     category
 payset    Int32
-ti_mon    category
+ti_mon    int32
 ti        int32
 paytot    int32
-dtypes: Int32(1), category(5), int32(5), int8(1)
-memory usage: 6.2 GB
+dtypes: Int32(1), category(4), int32(6), int8(1)
+memory usage: 6.6 GB
 
 -- Descriptive stats
 
-dec_pay            143131589
-other               22991869
-no_dec_no_pay       14750810
-dec_no_pay           2225047
-pay_prev_dec         1799477
-sin especificar          146
+dec_pay          143131589
+other             22992015
+no_dec_no_pay     14750810
+dec_no_pay         2225047
+pay_prev_dec       1799477
 Name: typpay, dtype: int64
 
 salaried     149914223
@@ -297,25 +296,25 @@ Name: e_reg, dtype: int64
 -- Slices equal to concat dataframe: True
 
 -- Begin pickling 
--- Time elapsed first half:  55 sec.
--- Time elapsed second half: 33 sec.
+-- Time elapsed first half:  59 sec.
+-- Time elapsed second half: 35 sec.
 
 -- Pickle income sample
 
--- Total time elapsed: 52 min. / 3153 sec.
+-- Total time elapsed: 71 min. / 4280 sec.
 
--- Timestamp: 2019-08-23 23:43:50
+-- Timestamp: 2019-09-10 11:44:35
 
 
 
 
 -- Executing: health\derived\append\code/dictionaries.py
--- Timestamp: 2019-08-23 21:32:24
+-- Timestamp: 2019-09-09 16:58:42
 
 -- Begin MONTH dictionary
 
 -- Begin pool PROMUN CODE PROID
--- Time pool.map and concat:  1506 sec.
+-- Time pool.map and concat:  1515 sec.
 
 -- Create PROMUN dictionary
 
@@ -323,15 +322,15 @@ Name: e_reg, dtype: int64
 
 -- Create PROID dictionary
 
--- Total time elapsed: 27 min. | 1624 sec.
+-- Total time elapsed: 27 min. | 1661 sec.
 
--- Timestamp: 2019-08-23 21:59:30
+-- Timestamp: 2019-09-09 17:26:24
 
 
 
 
 -- Executing: health\derived\append\code/hdischarge.py
--- Timestamp: 2019-08-23 23:44:22
+-- Timestamp: 2019-09-09 19:15:36
 
 -- Begin pool 
 -- Time pool.map and concat:  12 sec.
@@ -369,20 +368,20 @@ muerto        3445
 Name: discond, dtype: int64
 
 -- Begin pickling 
--- Time elapsed pickling: 3 sec.
+-- Time elapsed pickling: 4 sec.
 
--- Total time elapsed: 0 min. / 28 sec.
+-- Total time elapsed: 0 min. / 35 sec.
 
--- Timestamp: 2019-08-23 23:44:51
+-- Timestamp: 2019-09-09 19:16:12
 
 
 
 
 -- Executing: health\derived\append\code/pbonificadas.py
--- Timestamp: 2019-08-23 21:59:49
+-- Timestamp: 2019-09-09 17:26:44
 
 -- Begin pool 
--- Time pool.map and concat:  1865 sec.
+-- Time pool.map and concat:  1945 sec.
 
 -- Concat dataframe dtypes
 <class 'pandas.core.frame.DataFrame'>
@@ -429,7 +428,7 @@ dtype: int64
 
 -- Cleaning 
 -- Drop if not in beneficiaries:  17936034 rows dropped (5.21%)
--- Time elapsed cleaning : 904 sec.
+-- Time elapsed cleaning : 1025 sec.
 
 -- Descriptive stats 
 
@@ -495,19 +494,19 @@ memory usage: 10.5 GB
 -- Split final dataframe 
 
 -- Begin pickling 
--- Time elapsed first third:  42 sec.
--- Time elapsed second third: 39 sec.
--- Time elapsed second third: 33 sec.
+-- Time elapsed first third:  45 sec.
+-- Time elapsed second third: 46 sec.
+-- Time elapsed second third: 34 sec.
 
--- Total time elapsed: 49 min. | 2958 sec.
+-- Total time elapsed: 52 min. | 3178 sec.
 
--- Timestamp: 2019-08-23 22:49:08
+-- Timestamp: 2019-09-09 18:19:43
 
 
 
 
 -- Executing: health\derived\append\code/solicitudges.py
--- Timestamp: 2019-08-23 22:49:27
+-- Timestamp: 2019-09-09 18:20:02
 -- Value counts merge families
 -- Drop if not in beneficiaries:  193115 rows dropped (12.58%)
 
@@ -801,6 +800,6 @@ Name: gesclo, dtype: int64
 201706    17126
 Name: month, dtype: int64
 
--- Total time elapsed: 1 min. | 106 sec.
+-- Total time elapsed: 2 min. | 132 sec.
 
--- Timestamp: 2019-08-23 22:51:14
+-- Timestamp: 2019-09-09 18:22:15
