@@ -10,6 +10,7 @@ program main
 	
 	use  ..\temp\ind_pbon_hs_events.dta, clear
 	create_event_vars
+	save ..\temp\ind_pbon_event.dta, replace
 	
 	preserve
 		keep if hs_n_nc==1 & hs_hiv_t==0 & all==1
@@ -17,6 +18,60 @@ program main
 		keep control gender age_all* *bund* married income_am ti*
 		save ..\temp\ind_event.dta, replace
 	restore
+	
+	use ..\temp\ind_pbon_event.dta, clear
+	create_balanced_panel
+	save ..\temp\ind_did.dta, replace
+
+end
+
+capture program drop create_balanced_panel
+program              create_balanced_panel	
+	assert !mi(date_hiv) & !mi(id_b) & !mi(id_m)
+	assert inlist(control,0,1)
+	* New vars
+	encode region, g(regionid)
+	encode munici, g(municiid)
+	bys id_m id_b date_pb: egen n_pb = count(isapre)
+	replace civs=0 if inlist(civs,.,3,4)
+	gen Week_hiv   = wofd(hs_hiv_start) //date_hiv
+	format %tw Week_hiv
+	gen Month_hiv  = mofd(hs_hiv_start) //date_hiv
+	format %tm Month_hiv
+	* Sample
+	drop age_*male code*
+	drop if hs_hiv_t==0 // exclude any servs on the event of the HIV test
+	keep if !mi(age_all)
+	* Balanced panel
+	local controls = " age* ti* civs N regionid gender "
+	local y_vars = "y_docvisit     y_spevisit          y_prevscre        y_diagther " ///
+				 + "y_surgery      y_hospital          y_examslab        y_psychias"
+	local ylabs = `""Doctor visit" "Specialist visit"  "Preventive care" "Diagnosis/therapy" "' ///
+				+ `""Surgery"      "Hospitalization"   "Lab tests"       "Mental health""'
+	foreach v of varlist `y_vars' { 
+		gen max_`v' = `v'
+		gen sum_`v' = `v'
+		drop `v'
+	}
+	sort id_b id_m date_pb
+	drop date_*
+	collapse (sum) sum_*  (max) max_* (mean) control (firstnm) `controls' Month* Week_hiv ///
+		, by(id_m id_b Week)
+	assert inlist(control,0,1) & !mi(id_b) & !mi(id_m)
+	isid id_b Week
+	qui xtset id_b Week
+	tsfill, full
+	xtset id_b Week
+	foreach x of varlist sum_* max_* {
+		replace `x' = 0 if mi(`x')
+	}
+	bys id_b (Week): carryforward control age* ti* civs N regionid gender id_m Week_hiv, replace
+	gen nWeek = -Week
+	bys id_b (nWeek): carryforward control age* ti* civs N regionid gender id_m Week_hiv, replace back
+	* Relative time variable
+	gen post_Week   = Week - Week_hiv 	//gen post_Month  = Month - Month_hiv
+	assert !mi(Week)
+	gen post_static = (Week > Week_hiv) if inrange(post_Week,-12,12) //date_pb!=date_hiv & 
 end
 
 capture program drop create_event_vars

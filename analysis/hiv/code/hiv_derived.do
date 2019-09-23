@@ -10,20 +10,22 @@ program main
 		clean_families, filename(`filename')
 	}
 	
+	clear
+	
 	use "..\..\..\derived\clean\output\agg_pbon.dta", clear
 	merge m:1 id_m id_b month isapre using ..\temp\agg_fam.dta, keep(1 3) nogen
 	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", keep(1 3)
 	* Clean
-	clean_pbon_time
+	qui clean_pbon_time
 	//keep if date_hiv==date_pb & n_hiv_test==1
 	//drop n_hiv_test date_hiv
-	create_demo_vars
-	create_health_vars
+	qui create_demo_vars
+	qui create_health_vars
 	save ..\temp\agg_pbon.dta, replace //hiv_pbon.dta
 	
 	keep if i_hiv==1
 	drop i_hiv code*
-	create_hiv_vars
+	qui create_hiv_vars
 	save ..\temp\agg_hiv.dta, replace //hiv_tests
 
 	clear
@@ -32,8 +34,10 @@ program main
 	merge m:1 id_b id_m using ..\temp\ind_fam.dta, nogen // keep(3)
 	merge m:1 code7 using "D:\Personal Directory\Catalina\Google_Drive\Projects\health_shock\codes\dic_codes_all.dta", nogen keep(1 3)
 	* Clean
-	clean_pbon_time	
-	create_demo_vars
+	qui clean_pbon_time	
+	qui create_demo_vars
+	qui create_health_vars
+	drop tests1 tests2
 	bys id_m id_b: egen date_hivm = min(date_hiv) if control==0 & date_hiv>=td(${hiv5_Day_R})
 	bys id_m id_b: egen date_hivC = min(date_hiv) if control==1 & date_hiv>=mdy(month(td(${hiv5_Day_R})),day(td(${hiv5_Day_R})),year(td(${hiv5_Day_R}))-1)
 	replace date_hivm = date_hivC                 if control==1 & date_hiv>=mdy(month(td(${hiv5_Day_R})),day(td(${hiv5_Day_R})),year(td(${hiv5_Day_R}))-1)
