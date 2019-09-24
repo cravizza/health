@@ -28,9 +28,13 @@ program main
 	qui do "..\globals.do"
 	use "..\..\..\derived\clean\output\hiv_conf.dta", clear
 	clean_confirmations
-	save "..\output\confirmations.dta", replace
+	save "..\temp\confirmations.dta", replace
 	
-	use "..\output\confirmations.dta", clear
+	use "..\temp\confirmations.dta", clear
+	duplicates drop id_b Week_hiv Week_co, force
+	save "..\temp\confirmations_list.dta", replace
+	
+	use "..\temp\confirmations.dta", clear
 	plot_tests_after_HIV_test
 
 end
@@ -107,12 +111,14 @@ program clean_confirmations
 	gen c_cvi = inlist(code7,${code_cvi})
 	gen Week = wofd(date_pb)
 	gen Week_hiv = wofd(date_hiv) //date_hiv
+	gen Week_co  = wofd(date_co) //date_hiv
+	format %tw Week_hiv Week Week_co
 	format %tw Week_hiv Week	
 	gen post_Week   = Week - Week_hiv
 	assert !mi(Week)
 	sort id_b id_m date_pb
 	drop date_*
-	collapse  (max) c_* (firstnm) post_Week Week_hiv, by(id_b Week)
+	collapse  (max) c_* (firstnm) post_Week Week_hiv Week_co, by(id_b Week)
 	gen t_hiv_pb = Week - Week_hiv
 	lab var t_hiv_pb  "Weeks between HIV test and health service"
 	isid id_b Week
