@@ -15,7 +15,7 @@ program main
 	preserve
 		keep if hs_n_nc==1 & hs_hiv_t==0 & all==1
 		isid id_b
-		keep control gender age_all* *bund* married income_am ti*
+		keep control gender age_all* *bund* married income_am ti* civs*
 		save ..\temp\ind_event.dta, replace
 	restore
 	
@@ -33,7 +33,7 @@ program              create_balanced_panel
 	encode region, g(regionid)
 	encode munici, g(municiid)
 	bys id_m id_b date_pb: egen n_pb = count(isapre)
-	replace civs=0 if inlist(civs,.,3,4)
+	replace civs=4 if inlist(civs,3)
 	gen Week_hiv   = wofd(hs_hiv_start) //date_hiv
 	format %tw Week_hiv
 	gen Month_hiv  = mofd(hs_hiv_start) //date_hiv
@@ -140,8 +140,13 @@ program              create_event_vars
 	replace tibin = 4 if ti>`r(max)'
 	lab define tibin 1 "Zero" 2 "Below median" 3 "Above median" 4 "Max TI and above"
 	lab values tibin tibin
-	* Age and income group dummies
-	foreach v in "tibin" "age_all" {
+	* Civs
+	replace civs = 3 if civs==4
+	replace civs = 4 if inlist(civs,.,0)
+	lab define civs 1 "Single" 2 "Married" 3 "Other" 4 "Unknown"
+	lab values civs civs
+	* Age, civs, and income group dummies
+	foreach v in "tibin" "age_all" "civs" {
 		levelsof `v', l(list_`v')
 		local Na `: word count `list_`v'''
 		forv x = 1(1)`Na' {

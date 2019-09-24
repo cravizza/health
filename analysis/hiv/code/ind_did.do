@@ -3,7 +3,7 @@ set more off
 
 program main
 	qui do ..\globals.do
-	global controls = " civs N regionid "	
+	global controls = " civs N regionid tibin "	
 	local rvar = "age_all"
 	use ..\temp\ind_did.dta, clear
 	set graphics off
@@ -64,7 +64,7 @@ syntax, time(varname) r_var(varname)
 		foreach outcome of varlist max_* {
 			reg `outcome' i.treat i.i_post ib26.i_inte i.`r_var' `i_controls' i.`time'no
 			coefplot, `coefplot_opts' xtitle("`time_label'")  `cp_xlab' ///
-				drop(_cons *.treat *.i_post `cp_drop' *.`r_var' *.civs *.N_hiv_test *.regionid *.gender *.`time'no)
+				drop(_cons *.treat *.i_post `cp_drop' *.`r_var' *.civs *.N_hiv_test *.regionid *.gender *.tibin *.`time'no)
 			graph export ../output/did_`time'_`r_var'_`outcome'.pdf, replace
 		}
 	restore

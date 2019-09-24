@@ -40,8 +40,9 @@ program main
 	local list_dummies_LYbund = "LYbund_not LYbund_std LYbund_chk LYbund_s_c"
 	local list_dummies_age_all = "age_all_1 age_all_2 age_all_3 age_all_4"
 	local list_dummies_tibin   = "  tibin_1   tibin_2   tibin_3   tibin_4"
+	local list_dummies_civs    = "   civs_1    civs_2    civs_3    civs_4"
 	
-	foreach varname in "bund" "LYbund" "age_all" "tibin" {
+	foreach varname in "bund" "LYbund" "age_all" "tibin" "civs" {
 		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'')
 	}
 end
