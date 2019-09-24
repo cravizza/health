@@ -31,7 +31,8 @@ program main
 	save "..\temp\confirmations.dta", replace
 	
 	use "..\temp\confirmations.dta", clear
-	duplicates drop id_b Week_hiv Week_co, force
+	keep id_b Week_hiv Week_co
+	duplicates drop
 	save "..\temp\confirmations_list.dta", replace
 	
 	use "..\temp\confirmations.dta", clear
