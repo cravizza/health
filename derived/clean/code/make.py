@@ -5,6 +5,7 @@ def main():
 	os.system('python seasonality.py')
 	os.system('python hiv.py')
 	os.system('python confirmations.py')
+	os.system('python predict.py')
 
 	# Logging
 	filenames = [os.path.join(path, f) for path, sd, files in os.walk('../output') for f in files if 'log_' in f]
