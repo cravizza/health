@@ -45,6 +45,11 @@ program main
 	foreach varname in "bund" "LYbund" "age_all" "tibin" "civs" {
 		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'')
 	}
+	foreach varname in "bund" "LYbund" {
+		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'') restr(civs_1==1)    add_fn(_single)
+		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'') restr(age_all_1==1) add_fn(_young)
+		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'') restr(tibin_4==1)   add_fn(_maxTI)
+	} 
 end
 
 capture program drop trend_by_var
