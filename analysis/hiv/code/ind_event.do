@@ -49,7 +49,26 @@ program main
 		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'') restr(civs_1==1)    add_fn(_single)
 		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'') restr(age_all_1==1) add_fn(_young)
 		bar_graph, v(`varname') list_dummies_v(`list_dummies_`varname'') restr(tibin_4==1)   add_fn(_maxTI)
-	} 
+	}
+	use ..\temp\ind_event_idb.dta, clear
+	sort control
+	replace control=2 if control==0
+	label define control 0 "" 2 "`:lab (control) 0'", modify
+	merge 1:1 id_b date_hiv using ..\temp\agg_all_tests.dta, keep(3) nogen
+	foreach v in "test_n4" {
+		levelsof `v', l(list_`v')
+		local Na `: word count `list_`v'''
+		forv x = 1(1)`Na' {
+			gen     `v'_`x' = (`v'==`x')
+			lab var `v'_`x' "`:lab (`v') `x''"
+		}
+	}	
+	bar_graph, v(test_n4) list_dummies_v("test_n4_1 test_n4_2 test_n4_3 test_n4_4")
+	bar_graph, v(test_n4) list_dummies_v("test_n4_1 test_n4_2 test_n4_3 test_n4_4") restr(civs_1==1)    add_fn(_single)
+	bar_graph, v(test_n4) list_dummies_v("test_n4_1 test_n4_2 test_n4_3 test_n4_4") restr(age_all_1==1) add_fn(_young)
+	bar_graph_varlist, list_v(initiation  less_than_yr)
+	bar_graph_varlist, list_v(initiation  less_than_yr) restr(civs_1==1)    add_fn(_single)
+	bar_graph_varlist, list_v(initiation  less_than_yr) restr(age_all_1==1) add_fn(_young)
 end
 
 capture program drop trend_by_var
@@ -118,6 +137,53 @@ syntax, v(varname) list_dummies_v(str) [restr(str) add_fn(str)]
 					7.5 `""`:lab (`v') 3'" "[`pv_3']""' 10.5 `""`:lab (`v') 4'" "[`pv_4']""', noticks) ///
 			   ytitle("Share") xtitle("")
 		graph export "..\output\ind_event_bar_`v'`add_fn'.pdf", replace	
+	restore
+end
+
+capture program drop bar_graph_varlist
+program              bar_graph_varlist
+syntax, list_v(varlist) [restr(str) add_fn(str)]
+	preserve
+		capture keep if `restr'	
+		foreach I_v of varlist `list_v' {
+			di "_______________________________________________________________________________________"
+			di "_______________________________________________________________________________________"
+			di " --- `I_v' : `:lab (`I_v') 1'"
+			gen b_mean_`I_v' = .
+			gen b_ci_u_`I_v' = .
+			gen b_ci_l_`I_v' = .
+			gen b_N_`I_v'= .
+			gen b_pv_`I_v' = .
+			forv c = 0/1 {
+				local c1 = `c' + 1
+				local restr = " if control==`c1'"
+				qui ci `I_v' `restr', binomial
+				qui replace b_mean_`I_v' = r(mean) `restr'
+				qui replace b_ci_u_`I_v' = r(ub)   `restr'
+				qui replace b_ci_l_`I_v' = r(lb)   `restr'
+				qui replace    b_N_`I_v' = r(N)    `restr'
+			}
+			prtest `I_v', by(control)
+			local pv_`I_v' : di %5.4f 2*(1-normal(abs(r(z))))
+			qui replace b_pv_`I_v' = 2*(1-normal(abs(r(z)))) //get pv from z
+		}
+		local v1: word 1 of `list_v'
+		local v2: word 2 of `list_v'
+		gen tc_`v1' = control     //if `v'==1
+		gen tc_`v2' = control + 3 //if `v'==2
+		keep control* b_* tc* `list_v'
+		duplicates drop
+		twoway (bar b_mean_`v1' tc_`v1' if control==1, col(purple)) ///
+			   (bar b_mean_`v2' tc_`v2' if control==1, col(purple)) ///
+			   (bar b_mean_`v1' tc_`v1' if control==2, col(green)) ///
+			   (bar b_mean_`v2' tc_`v2' if control==2, col(green)) ///
+			   (rcap b_ci_u_`v1' b_ci_l_`v1' tc_`v1', col(black)) ///
+			   (rcap b_ci_u_`v2' b_ci_l_`v2' tc_`v2', col(black)), ///
+			   ${wb} ///
+			   legend(row(1) order(1 "`:lab (control) 1'" 3 "`:lab (control) 2'")) ///
+			   xlab(1.5 `""`:lab (`v1') 1'" "[`pv_`v1'']""'  4.5 `""`:lab (`v2') 1'" "[`pv_`v2'']""', noticks) ///
+			   ytitle("Share") xtitle("")
+		graph export "..\output\ind_event_bar_`v1'_`v2'`add_fn'.pdf", replace
 	restore
 end
 

@@ -25,8 +25,12 @@ program main
 	
 	keep if i_hiv==1
 	drop i_hiv code*
+	isid id_b date_pb
 	qui create_hiv_vars
 	save ..\temp\agg_hiv.dta, replace //hiv_tests
+	assert date_pb==date_hiv
+	keep id_b date_hiv initiation less_than_yr test_n4
+	save ..\temp\agg_all_tests.dta, replace 
 
 	clear
 	
@@ -193,9 +197,12 @@ program              create_hiv_vars
 	label define copay_gr 1 "Zero" 2 "Non-0 below median" 3 "Non-0 above median"
 	label values copay_gr copay_gr
 	* Number of tests
-	bys id_m id_b (date_pb): gen test_n = _n
+	bys id_m (date_pb): gen test_n = _n
+	gen test_n4 = cond(test_n>4,4,test_n)
+	label define test_n4 1 "First" 2 "Second" 3 "Third" 4 "4+"
+	label values test_n4 test_n4
 	gen     int_2ndtest = Week-Week[_n-1] if test_n==2
-	egen    test_N      = max(test_n), by(id_m id_b)
+	egen    test_N      = max(test_n), by(id_b)
 	replace test_n      = 3 if test_n>3
 	label define test_n 1 "First time" 2 "Second time" 3 "3+"
 	label values test_n test_n
@@ -204,7 +211,7 @@ program              create_hiv_vars
 	drop days_last_test
 	label define less_than_yr 0 "No recent test" 1 "Less than a year"
 	label values less_than_yr less_than_yr
-	gen initiation = (N_hiv_test==1)
+	gen initiation = (test_n==1)
 	label define initiation 0 "Recurring" 1 "Initiation"
 	label values initiation initiation
 end

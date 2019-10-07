@@ -15,7 +15,9 @@ program main
 	preserve
 		keep if hs_n_nc==1 & hs_hiv_t==0 & all==1
 		isid id_b
-		keep control gender age_all* *bund* married income_am ti* civs*
+		keep id_b date_hiv control gender age_all* *bund* married income_am ti* civs*
+		save ..\temp\ind_event_idb.dta, replace
+		drop id_b date_hiv
 		save ..\temp\ind_event.dta, replace
 	restore
 	
