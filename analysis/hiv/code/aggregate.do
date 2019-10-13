@@ -65,7 +65,7 @@ syntax, time(varname) window(int)
 				local vars = "`vars'" + " t`t'"
 				qui sum `time' if t==`t'
 				local lab_t`t' : di %tw `r(mean)' 
-				local lab_t`t' = char(36) + " c_{`c'} " + char(36) + ": `lab_t`t''"
+				local lab_t`t' = char(36) + " \beta_{`c'} " + char(36) + ": `lab_t`t''"
 			}
 		restore
 	}
@@ -91,7 +91,16 @@ syntax, time(varname) r_var(varname) window(int)
 	preserve
 		collapse (count) tests=age (first) Year if `r_var'==1, by(`time')
 		lab var tests "Number of tests"
-		tw line tests `time' if inrange(Year,2016,2017), ${wb} ${hiv5_`time'_tlinelab} lc(midgreen)
+		*tw line tests `time' if inrange(Year,2016,2017), ${wb} ${hiv5_`time'_tlinelab} lc(midgreen)
+		qui sum tests  if inrange(Year,2016,2017)
+		local min_t = `=floor(`r(min)'/100)*100'
+		local max_t = `=ceil(`r(max)'/100)*100'
+		tw (scatteri `max_t' `=w(2017w21)' `max_t' `=w(2017w40)', bcolor(gs15) recast(area) legend(off)) ///
+		   (scatteri `min_t' `=w(${hiv5_Week_R})' `max_t' `=w(${hiv5_Week_R})', recast(line) lc(gs8) lp(shortdash)) ///
+		   (scatteri `min_t' `=w(${hiv5_Week_A})' `max_t' `=w(${hiv5_Week_A})', recast(line) lc(gs8) lp(shortdash)) ///
+		   (scatteri `min_t' `=w(${hiv5_Week_L})' `max_t' `=w(${hiv5_Week_L})', recast(line) lc(black) lp(dash)) ///
+		   (line tests `time' if inrange(Year,2016,2017), ${wb} lc(midgreen) xti(`time') yti(`:var lab tests') ///
+		    ylab(`min_t'(200)`max_t') xlabel(`=w(2016w1)'(26)`=w(2018w1)', format(%tw)))
 		graph export ../output/trend5_`r_var'_`time'_all.pdf, replace
 	restore
 	preserve
@@ -142,7 +151,7 @@ syntax, time(varname) r_var(varname) window(int)
 			local vars = "`vars'" + " t`t'"
 			qui sum `time' if t==`t'
 			local lab_t`t' : di %tw `r(mean)' 
-			local lab_t`t' = char(36) + " c_{`c'} " + char(36) + ": `lab_t`t''"
+			local lab_t`t' = char(36) + " \beta_{`c'} " + char(36) + ": `lab_t`t''"
 		}
 		file open myfile using "..\output\es5_`r_var'_`window'_`time'.tex", write replace
 		file write myfile "\begin{threeparttable}" ///
