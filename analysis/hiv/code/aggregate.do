@@ -111,6 +111,25 @@ syntax, time(varname) r_var(varname) window(int)
 		gen  `time'no = week(dofw(`time'))
 		gen t = cond(inrange(Week,tw(${hiv5_`time'_L})-`window',tw(${hiv5_`time'_L})+`window'),`time' - tw(${hiv5_`time'_L}) + `window' + 1,0)
 		gen b = Week - tw(2012w1)
+		
+		reg tests b i.t i.`time'no i.Year
+		predict tests_nc
+		forval i = 0/31 {
+			replace tests_nc = tests_nc - _b[`i'.t] if t==`i'
+		}
+		lab var tests_nc "Predicted, without event dummies"
+		qui sum tests  if inrange(Year,2016,2017)
+		local max_t = `=ceil(`r(max)'/100)*100'
+		tw (scatteri `max_t'  `=w(2017w21)' `max_t' `=w(2017w40)', bcolor(gs15) recast(area) legend(off)) ///
+		   (scatteri 0 `=w(${hiv5_Week_R})' `max_t' `=w(${hiv5_Week_R})', recast(line) lc(gs8) lp(shortdash)) ///
+		   (scatteri 0 `=w(${hiv5_Week_A})' `max_t' `=w(${hiv5_Week_A})', recast(line) lc(gs8) lp(shortdash)) ///
+		   (scatteri 0 `=w(${hiv5_Week_L})' `max_t' `=w(${hiv5_Week_L})', recast(line) lc(black) lp(dash)) ///
+		   (line tests    `time' if inrange(Year,2016,2017), ${wb} lc(midgreen) xti(`time') yti(`:var lab tests') ///
+		    ylab(0(300)`max_t') xlabel(`=w(2016w1)'(26)`=w(2018w1)', format(%tw))) ///
+		   (line tests_nc `time' if inrange(Year,2016,2017), ${wb} lc(blue)     xti(`time') ///
+		    ylab(0(300)`max_t') xlabel(`=w(2016w1)'(26)`=w(2018w1)', format(%tw))) ///
+			, legend(on order(5 6))
+		graph export ../output/trend5_`r_var'_`time'_pred.pdf, replace
 
 		reg tests b i.t i.`time'no i.Year
 		local T = 2*`window' + 1
