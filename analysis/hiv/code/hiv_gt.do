@@ -51,6 +51,31 @@ program main
 	tw (line vihsida Week, lc(midgreen)) (line sifilis Week, lc(purple)) ///
 		, ${wb} ${hiv5_Week_tlinelab} yt("Google trends index")
 	graph export ..\output\gt_vihsifilis_Week.pdf, replace
+	
+	import delimited using "`path_gt'gt_hiv_sifilis_032018.csv", clear  varnames(2) 
+	clean_raw_gt
+	tempfile vihsifilis
+	save    `vihsifilis'
+
+	import delimited using "`path_gt'gt_hivsifexam_032018.csv", clear  varnames(2) 
+	clean_raw_gt
+	rename examenvihexamensidatestelisachil vihexam
+	rename examensifilisvdrlchile sifexam
+
+	merge 1:1 Week using `vihsifilis', nogen assert(3)
+	
+	lab var vihexam "HIV/AIDS + testing"
+	lab var sifexam "Syphilis + testing"
+	lab var vihsidachile "HIV/AIDS"
+	lab var sifilischile "Syphilis"
+	sort Week
+	//keep if inrange(Week,tw(2016w1),tw(2018w1))
+	tw (line vihexam Week, lc(midgreen)) (line sifexam Week, lc(purple)) ///
+		, ${wb} ${hiv5_Week_tlinelab} yt("Google trends index") // legend(on order(1))
+	graph export ..\output\gt_vihexamen_Week_032018.pdf, replace
+	tw (line vihsida Week, lc(midgreen)) (line sifilis Week, lc(purple)) ///
+		, ${wb} ${hiv5_Week_tlinelab} yt("Google trends index")
+	graph export ..\output\gt_vihsifilis_Week_032018.pdf, replace
 end
 
 program clean_raw_gt
