@@ -185,6 +185,7 @@ def main():
     ind_pbon.rename(columns={'mD':'date_hiv'}, inplace=True)
     ind_pbon = ind_pbon.loc[ind_pbon['date']<ind_pbon['date_hiv']]
     ind_pbon.reset_index(drop=True,inplace=True)
+    ind_pbon['predict'] = 1
     ind_idb = ind_pbon[['id_b']].copy().drop_duplicates()
     ind_idb['predict'] = 1
     ind_idb['tester']  = 1

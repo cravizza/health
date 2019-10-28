@@ -35,7 +35,7 @@ program main
 	merge m:1 id_b id_m using `treat_fam', keep(1 3) nogen
 	rename gender gender_num
 	replace predict=0 if mi(predict)
-	merge m:1 id_b predict     using ..\..\..\derived\clean\output\predict_ly.dta, keep(1 3) nogen
+	merge m:1 id_b predict     using ..\..\..\derived\clean\output\predict_ly0.dta, keep(1 3) nogen
 	drop index
 	rename predict campaign
 	replace campaign=0 if mi(campaign)
@@ -77,9 +77,22 @@ program main
 	logit tester I_*  i.civs i.regionid i.tibin i.age_all i.gender if campaign==0
 	capture drop p_tester
 	predict p_tester
-	lab var p_tester "Estimated probability of getting HIV test"
-	hist p_tester if tester==1, by(campaign, note("")) scheme(s1color) subtitle(, fcolor(white))
+	lab var p_tester "Testers' estimated probability of getting HIV test"
+	qui sum p_tester  if tester==1
+	local rM = ceil(`r(max)'/0.01)*0.01
+	hist p_tester if tester==1, by(campaign, note("")) scheme(s1color) subtitle(, fcolor(white)) ///
+		 xlab(0(0.04)`rM') xsize(8)
 	graph export ..\output\predict_tester.pdf, replace
+	cquantile p_tester if tester==1, by(campaign) gen(pt_0 pt_1)
+	qui sum pt_1
+	local rM = ceil(`r(max)'/0.01)*0.01
+	qqplot pt_0 pt_1, mc(midgreen) xsize(5) ysize(5) ${wb} xlab(0(0.04)`rM') ylab(0(0.04)`rM')
+	graph export ..\output\predict_tester_qq.pdf, replace
+	ksmirnov p_tester if tester==1 & p_tester<0.054, by(campaign) //99%sample
+	local r_p: di %5.4f `r(p)'
+	local r_D: di %5.4f `r(D)'
+	di "Two-sample Kolmogorov-Smirnov test for equality of distribution functions: p-value = `r_p'"
+	di "The largest difference between the distribution functions in any direction is `r_D'"
 end
 
 capture program drop clean_families
