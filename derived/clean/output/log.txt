@@ -2,6 +2,37 @@ Logging: health\derived\clean\code
 
 
 
+-- Executing: health\derived\clean\code/agg_plots.py
+-- Timestamp: 2019-10-28 00:05:28
+
+-- Load pbon
+-- Load beneficiaries
+
+-- Construct subsample: balanced
+-- Keep if balanced: 98612873 rows dropped (43.38%)
+
+-- Benef Descriptive statistics for tex file
+\item Observations: 227423412
+\item Families: 2575393
+\item Individuals: 4399932
+\item Men: 54.31\%
+\item Main insured: 55.11\%
+\item Median number of months by family: 58.0
+
+-- PB Descriptive statistics for tex file
+\item Observations: 187568004
+\item Families: 1039812
+\item Individuals: 1774224
+\item Men: 43.92\%
+\item Main insured: 64.95\%
+-- Load data, time elapsed load and concat: 2069 sec.
+-- Plots, time elapsed: 28 sec.
+
+-- Timestamp: 2019-10-28 00:40:27
+
+
+
+
 -- Executing: health\derived\clean\code/confirmations.py
 -- Timestamp: 2019-09-23 17:47:00
 
