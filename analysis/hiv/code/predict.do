@@ -82,12 +82,12 @@ program main
 	local rM = ceil(`r(max)'/0.01)*0.01
 	hist p_tester if tester==1, by(campaign, note("")) scheme(s1color) subtitle(, fcolor(white)) ///
 		 xlab(0(0.04)`rM') xsize(8)
-	graph export ..\output\predict_tester.pdf, replace
+	graph export ..\output\predict_tester.png, replace
 	cquantile p_tester if tester==1, by(campaign) gen(pt_0 pt_1)
 	qui sum pt_1
 	local rM = ceil(`r(max)'/0.01)*0.01
 	qqplot pt_0 pt_1, mc(midgreen) xsize(5) ysize(5) ${wb} xlab(0(0.04)`rM') ylab(0(0.04)`rM')
-	graph export ..\output\predict_tester_qq.pdf, replace
+	graph export ..\output\predict_tester_qq.png, replace
 	ksmirnov p_tester if tester==1 & p_tester<0.054, by(campaign) //99%sample
 	local r_p: di %5.4f `r(p)'
 	local r_D: di %5.4f `r(D)'

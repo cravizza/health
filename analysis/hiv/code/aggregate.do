@@ -101,13 +101,13 @@ syntax, time(varname) r_var(varname) window(int)
 		   (scatteri `min_t' `=w(${hiv5_Week_L})' `max_t' `=w(${hiv5_Week_L})', recast(line) lc(black) lp(dash)) ///
 		   (line tests `time' if inrange(Year,2016,2017), ${wb} lc(midgreen) xti(`time') yti(`:var lab tests') ///
 		    ylab(`min_t'(200)`max_t') xlabel(`=w(2016w1)'(26)`=w(2018w1)', format(%tw)))
-		graph export ../output/trend5_`r_var'_`time'_all.pdf, replace
+		graph export ../output/trend5_`r_var'_`time'_all.png, replace
 	restore
 	preserve
 		collapse (count) tests=age (first) Year if `r_var'==1, by(`time')
 		lab var tests "Number of tests"
 		tw line tests `time' if inrange(Year,2016,2017), ${wb} ${hiv5_`time'_tlinelab} lc(midgreen)
-		graph export ../output/trend5_`r_var'_`time'.pdf, replace
+		graph export ../output/trend5_`r_var'_`time'.png, replace
 		gen  `time'no = week(dofw(`time'))
 		gen t = cond(inrange(Week,tw(${hiv5_`time'_L})-`window',tw(${hiv5_`time'_L})+`window'),`time' - tw(${hiv5_`time'_L}) + `window' + 1,0)
 		gen b = Week - tw(2012w1)
@@ -129,7 +129,7 @@ syntax, time(varname) r_var(varname) window(int)
 		   (line tests_nc `time' if inrange(Year,2016,2017), ${wb} lc(blue)     xti(`time') ///
 		    ylab(0(300)`max_t') xlabel(`=w(2016w1)'(26)`=w(2018w1)', format(%tw))) ///
 			, legend(on order(5 6))
-		graph export ../output/trend5_`r_var'_`time'_pred.pdf, replace
+		graph export ../output/trend5_`r_var'_`time'_pred.png, replace
 
 		reg tests b i.t i.`time'no i.Year
 		local T = 2*`window' + 1
@@ -149,7 +149,7 @@ syntax, time(varname) r_var(varname) window(int)
 		coefplot, vertical ${wb} drop(_cons *.Year *.`time'no b) ciopts(lc(midgreen)) ///
 			mc(midgreen) xtitle("`time_label'") ///
 			xlabel(`labs') xline(`xl', lc(black) lp(dash))	 xline(`x2' `x3', lc(gs8) lp(shortdash))
-		graph export ../output/es5_`r_var'_`window'_`time'.pdf, replace
+		graph export ../output/es5_`r_var'_`window'_`time'.png, replace
 		* Create table with trend 
 		reg tests b i.t i.`time'no i.Year
 		foreach v in "_cons" "b" {
@@ -223,7 +223,7 @@ syntax, campaign(int) time(varname) r_var(varname)
 			tw line Wtest Week if !mi(Wtest), ${wb} lc(midgreen) tline(`lhiv', lc(black) lp(dash)) ///
 				tline(`bd', lp("##-##-") lc(red)) ttext(`nx' `ny' "Break date: `bd'""p-value:`pv'" ///
 				 , place(sw) box just(center) margin(l+1 t+1 b+1 r+2) width(35) )
-			graph export "..\output\sb_`campaign'_`r_var'_`time'_`x'.pdf", replace
+			graph export "..\output\sb_`campaign'_`r_var'_`time'_`x'.png", replace
 		}
 	restore	
 end
@@ -248,9 +248,9 @@ syntax, time(varname) r_var(varname) by_var(str)
 			local labs = `"`labs'"' + `" `x' "`: label (`by_var') `x1''" "'
 		}
 		tw `lev_plot', ${wb} ${hiv5_`time'_tlinelab} legend(order(`labs') symx(6) c(`N'))			
-		graph export "..\output\trend_lv_`by_var'_`r_var'_`time'.pdf", replace	
+		graph export "..\output\trend_lv_`by_var'_`r_var'_`time'.png", replace	
 		tw  `sh_plot', ${wb} ${hiv5_`time'_tlinelab} legend(order(`labs') symx(6) c(`N')) ylab(0(0.25)1)
-		graph export "..\output\trend_sh_`by_var'_`r_var'_`time'.pdf", replace	
+		graph export "..\output\trend_sh_`by_var'_`r_var'_`time'.png", replace	
 	restore
 end
 
@@ -264,7 +264,7 @@ program trend_year
 		tw (line tst age if Year==2016, lc(purple)   lp(dash)) ///
 		   (line tst age if Year==2017, lc(midgreen) lp(longdash)) ///
 			, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2)) ylab(0(`maxI')`maxr')
-			graph export "..\output\trend_yr_age_18_45_male_by_year.pdf", replace
+			graph export "..\output\trend_yr_age_18_45_male_by_year.png", replace
 	restore
 	local wS = "w12 w31"
 	local wE = "w28 w47"
@@ -281,7 +281,7 @@ program trend_year
 			tw (line tst age if Year==2016, lc(purple)   lp(dash)) ///
 			   (line tst age if Year==2017, lc(midgreen) lp(longdash)) ///
 				, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2)) ylab(0(`maxI')`maxr')
-				graph export "..\output\trend_yr_age_18_45_male_by_year_`ws'`we'.pdf", replace
+				graph export "..\output\trend_yr_age_18_45_male_by_year_`ws'`we'.png", replace
 		restore
 	}
 end

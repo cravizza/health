@@ -6,9 +6,9 @@ program main
 	global controls = " civs N regionid tibin "	
 	local rvar = "age_all"
 	use ..\temp\ind_did.dta, clear
-	set graphics off
+	//set graphics off
 	did_dynamic, time(Week) r_var(`rvar')
-	set graphics on
+	//set graphics on
 end
 
 
@@ -65,7 +65,7 @@ syntax, time(varname) r_var(varname)
 			reg `outcome' i.treat i.i_post ib26.i_inte i.`r_var' `i_controls' i.`time'no
 			coefplot, `coefplot_opts' xtitle("`time_label'")  `cp_xlab' ///
 				drop(_cons *.treat *.i_post `cp_drop' *.`r_var' *.civs *.N_hiv_test *.regionid *.gender *.tibin *.`time'no)
-			graph export ../output/did_`time'_`r_var'_`outcome'.pdf, replace
+			graph export ../output/did_`time'_`r_var'_`outcome'.png, replace
 		}
 	restore
 end

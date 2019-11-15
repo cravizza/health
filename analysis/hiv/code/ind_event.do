@@ -84,7 +84,7 @@ syntax, by_var(str)
 		tw (connect sh_tst `by_var' if control==1, mc(purple)   lc(purple)   lp(dash)) ///
 		   (connect sh_tst `by_var' if control==0, mc(midgreen) lc(midgreen) lp(longdash)) ///
 			, ${wb} legend(order(1 "2016" 2 "2017") symx(6) c(2)) 
-			graph export "..\output\ind_sh_`by_var'.pdf", replace
+			graph export "..\output\ind_sh_`by_var'.png", replace
 	restore
 end
 
@@ -136,7 +136,7 @@ syntax, v(varname) list_dummies_v(str) [restr(str) add_fn(str)]
 			   xlab(1.5 `""`:lab (`v') 1'" "[`pv_1']""'  4.5 `""`:lab (`v') 2'" "[`pv_2']""' ///
 					7.5 `""`:lab (`v') 3'" "[`pv_3']""' 10.5 `""`:lab (`v') 4'" "[`pv_4']""', noticks) ///
 			   ytitle("Share") xtitle("")
-		graph export "..\output\ind_event_bar_`v'`add_fn'.pdf", replace	
+		graph export "..\output\ind_event_bar_`v'`add_fn'.png", replace	
 	restore
 end
 
@@ -183,7 +183,7 @@ syntax, list_v(varlist) [restr(str) add_fn(str)]
 			   legend(row(1) order(1 "`:lab (control) 1'" 3 "`:lab (control) 2'")) ///
 			   xlab(1.5 `""`:lab (`v1') 1'" "[`pv_`v1'']""'  4.5 `""`:lab (`v2') 1'" "[`pv_`v2'']""', noticks) ///
 			   ytitle("Share") xtitle("")
-		graph export "..\output\ind_event_bar_`v1'_`v2'`add_fn'.pdf", replace
+		graph export "..\output\ind_event_bar_`v1'_`v2'`add_fn'.png", replace
 	restore
 end
 
