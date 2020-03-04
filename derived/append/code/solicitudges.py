@@ -47,17 +47,22 @@ def clean_df(df):
     
     final_df['icd10'].fillna('0', inplace=True)
     final_df.drop(columns=['id_s','id_s_a','run_s'], inplace=True)
-       
-    for c in col_int:
-        final_df[c] = final_df[c].astype('int64')
 
-    final_df['month']  = pd.to_numeric(final_df['date'].str.replace("-","").str[0:6], downcast='integer')    
+    final_df['month']  = pd.to_numeric(final_df['date'].str.replace("-","").str[0:6], downcast='integer') 
+    final_df['event'].replace(to_replace=r'(^No aplicable)',value='tto_or_und', regex=True, inplace=True)
+    final_df['event'].replace(to_replace=r'(^Confirmaci.n)',value='confirmation', regex=True, inplace=True)
+    final_df['event'].replace(to_replace=r'(^Sospecha)',value='suspicion', regex=True, inplace=True)
+    final_df['event']   =   final_df['event'].astype('category')
+    final_df['evdate'] = final_df['evdate'].str.replace("3000-01-01","1800-01-01")
+    final_df['evdate'] = pd.to_numeric(final_df['evdate'].str.replace("-",""), downcast='integer')
+    final_df['date']   =   pd.to_numeric(final_df['date'].str.replace("-",""), downcast='integer')   
     final_df['isapre'] = final_df['isapre'].astype('int8')
     final_df['month']  =  final_df['month'].astype('int32')
     final_df['id_m']   =   final_df['id_m'].astype('int32')
     final_df['id_b']   =   final_df['id_b'].astype('int32')
-    final_df['date']   =   final_df['date'].astype('str')
-
+    for c in col_int:
+        final_df[c] = final_df[c].astype('int64')
+    
     return final_df
 
 def main():
